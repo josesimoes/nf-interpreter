@@ -828,21 +828,21 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
         case 7:
-        // Uart7_PAL.Uart_cfg.txend2_cb = NULL;                                                                     
-        // Uart7_PAL.Uart_cfg.rxend_cb = NULL;                                                                      
-        // Uart7_PAL.Uart_cfg.rxerr_cb = NULL;                                                                      
-        // Uart7_PAL.Uart_cfg.timeout_cb = NULL;                                                                    
-        // Uart7_PAL.Uart_cfg.timeout = 0;                                                                          
-        // Uart7_PAL.Uart_cfg.speed = 9600;                                                                         
-        // Uart7_PAL.Uart_cfg.cr1 = 0;                                                                              
-        // Uart7_PAL.Uart_cfg.cr2 = 0;                                                                              
-        // Uart7_PAL.Uart_cfg.cr3 = 0;                                                                              
-        // Uart7_PAL.TxBuffer = NULL;                                                                               
-        // Uart7_PAL.TxOngoingCount = 0;                                                                            
-        // Uart7_PAL.RxBuffer = Uart7_RxBuffer;                                                               
-        // Uart7_PAL.RxRingBuffer.Initialize(Uart7_PAL.RxBuffer, 256);                             
-        // Uart7_PAL.WatchChar = 0;   
-Init_UART7();
+            // Uart7_PAL.Uart_cfg.txend2_cb = NULL;
+            // Uart7_PAL.Uart_cfg.rxend_cb = NULL;
+            // Uart7_PAL.Uart_cfg.rxerr_cb = NULL;
+            // Uart7_PAL.Uart_cfg.timeout_cb = NULL;
+            // Uart7_PAL.Uart_cfg.timeout = 0;
+            // Uart7_PAL.Uart_cfg.speed = 9600;
+            // Uart7_PAL.Uart_cfg.cr1 = 0;
+            // Uart7_PAL.Uart_cfg.cr2 = 0;
+            // Uart7_PAL.Uart_cfg.cr3 = 0;
+            // Uart7_PAL.TxBuffer = NULL;
+            // Uart7_PAL.TxOngoingCount = 0;
+            // Uart7_PAL.RxBuffer = Uart7_RxBuffer;
+            // Uart7_PAL.RxRingBuffer.Initialize(Uart7_PAL.RxBuffer, 256);
+            // Uart7_PAL.WatchChar = 0;
+            Init_UART7();
             Uart7_PAL.UartDriver = &UARTD7;
             palUart = &Uart7_PAL;
             break;
