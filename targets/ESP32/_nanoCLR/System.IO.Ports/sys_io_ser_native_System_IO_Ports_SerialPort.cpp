@@ -350,7 +350,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::set_InvertSignalLe
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
-    
+
     // check if UART it's already opened
     if (palUart->SerialDevice)
     {
