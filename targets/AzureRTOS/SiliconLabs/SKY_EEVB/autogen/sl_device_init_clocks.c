@@ -10,7 +10,7 @@
 
 sl_status_t sl_device_init_clocks(void)
 {
-    CMU_CLOCK_SELECT_SET(HF, USHFRCO);
+    CMU_CLOCK_SELECT_SET(HF, HFXO);
 
     CMU_ClockEnable(cmuClock_HFLE, true);
     CMU_ClockEnable(cmuClock_HFPER, true);
