@@ -276,6 +276,14 @@ jobs:
         NeedsSRECORD: true
         CMakePreset: ST_NUCLEO64_F091RC
 
+      MXCHIP_AZ3166:
+        TargetBoard: MXCHIP_AZ3166
+        TargetSeries: 'stm32f4xx'
+        BuildOptions: 
+        NeedsDFU: false
+        NeedsSRECORD: true
+        CMakePreset: MXCHIP_AZ3166
+
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
