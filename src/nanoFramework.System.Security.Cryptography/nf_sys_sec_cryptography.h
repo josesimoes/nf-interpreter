@@ -19,7 +19,6 @@
 #include <nf_mbedtls_config.h>
 #endif
 
-
 #include "mbedtls/version.h"
 #include <mbedtls/platform.h>
 #include <mbedtls/md.h>
