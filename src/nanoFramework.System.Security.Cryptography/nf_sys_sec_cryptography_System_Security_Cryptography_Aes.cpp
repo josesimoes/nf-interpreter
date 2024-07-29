@@ -156,8 +156,11 @@ HRESULT Library_nf_sys_sec_cryptography_System_Security_Cryptography_Aes::Encryp
 {
     NANOCLR_HEADER();
 
-    mbedtls_aes_context encodeContext;
+    mbedtls_cipher_context_t ctx;
+    mbedtls_cipher_info_t const *cipherInfo;
     uint8_t *ivCopy = NULL;
+    uint8_t *workBuffer = NULL;
+    size_t olen;
 
     CLR_RT_HeapBlock_Array *keyArray;
     CLR_RT_HeapBlock_Array *ivArray;
@@ -208,32 +211,57 @@ HRESULT Library_nf_sys_sec_cryptography_System_Security_Cryptography_Aes::Encryp
     cipherTextArray = stack.TopValue().DereferenceArray();
 
     // init mbedtls context
-    mbedtls_aes_init(&encodeContext);
+    mbedtls_cipher_init(&ctx);
 
-    if (mbedtls_aes_setkey_enc(&encodeContext, keyArray->GetFirstElement(), keyArray->m_numOfElements * 8) ==
-        MBEDTLS_ERR_AES_INVALID_KEY_LENGTH)
+    // set up the cipher
+    cipherInfo = mbedtls_cipher_info_from_type(MBEDTLS_CIPHER_AES_128_CBC);
+    mbedtls_cipher_setup(&ctx, cipherInfo);
+
+    // need a work buffer to hold the encrypted data
+    workBuffer = (uint8_t *)platform_malloc(plainTextArray->m_numOfElements + cipherInfo->private_block_size);
+
+    if (workBuffer == NULL)
     {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
     }
 
-    if (mbedtls_aes_crypt_cbc(
-            &encodeContext,
-            MBEDTLS_AES_ENCRYPT,
-            plainTextArray->m_numOfElements,
-            ivCopy,
-            plainTextArray->GetFirstElement(),
-            cipherTextArray->GetFirstElement()) != 0)
+    // set the padding mode to none
+    mbedtls_cipher_set_padding_mode(&ctx, MBEDTLS_PADDING_NONE);
+
+    mbedtls_cipher_setkey(&ctx, keyArray->GetFirstElement(), keyArray->m_numOfElements * 8, MBEDTLS_ENCRYPT);
+
+    // encrypt the data
+    mbedtls_cipher_crypt(
+        &ctx,
+        ivCopy,
+        ivArray->m_numOfElements,
+        plainTextArray->GetFirstElement(),
+        plainTextArray->m_numOfElements,
+        workBuffer,
+        &olen);
+
+    // sanity check
+    if (olen != plainTextArray->m_numOfElements)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
 
+    // make sure nothing is left in memory
+    mbedtls_cipher_free(&ctx);
+
+    // copy back to the return array
+    memcpy(cipherTextArray->GetFirstElement(), workBuffer, plainTextArray->m_numOfElements);
+
     NANOCLR_CLEANUP();
 
-    // make sure nothing is left in memory
-    mbedtls_aes_free(&encodeContext);
     if (ivCopy != NULL)
     {
         platform_free(ivCopy);
+    }
+
+    if (workBuffer != NULL)
+    {
+        platform_free(workBuffer);
     }
 
     NANOCLR_CLEANUP_END();

@@ -27,6 +27,7 @@
 #include <mbedtls/md_internal.h>
 #endif
 #include <mbedtls/aes.h>
+#include <mbedtls/cipher.h>
 
 typedef enum __nfpack CipherMode
 {
