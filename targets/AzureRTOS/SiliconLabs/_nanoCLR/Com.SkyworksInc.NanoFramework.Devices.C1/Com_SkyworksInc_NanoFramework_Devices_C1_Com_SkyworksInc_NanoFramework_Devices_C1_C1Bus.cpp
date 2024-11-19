@@ -16,42 +16,39 @@
 using namespace Com_SkyworksInc_NanoFramework_Devices_C1::Com_SkyworksInc_NanoFramework_Devices_C1;
 
 
-CLR_RT_TypedArray_UINT8 C1Bus::NativeTransmitWrite( uint8_t param0, uint8_t param1, HRESULT &hr )
+void C1Bus::NativeTransmitWrite( uint8_t param0, uint8_t param1, CLR_RT_TypedArray_UINT8 param2, HRESULT &hr )
+{
+
+    (void)param0;
+    (void)param1;
+    (void)param2;
+    (void)hr;
+
+
+    ////////////////////////////////
+    // implementation starts here //
+
+
+    // implementation ends here   //
+    ////////////////////////////////
+
+
+}
+
+void C1Bus::NativeTransmitRead( uint8_t param0, CLR_RT_TypedArray_UINT8 param1, HRESULT &hr )
 {
 
     (void)param0;
     (void)param1;
     (void)hr;
-    CLR_RT_TypedArray_UINT8 retValue = 0;
 
-    ////////////////////////////////
-    // implementation starts here //
-    memcpy((void*)retValue.GetBuffer(), (const void*)0x0122, 
-
-    // implementation ends here   //
-    ////////////////////////////////
-
-    return retValue;
-}
-
-CLR_RT_TypedArray_UINT8 C1Bus::NativeTransmitRead( uint8_t param0, HRESULT &hr )
-{
-
-    (void)param0;
-    (void)hr;
 
     ////////////////////////////////
     // implementation starts here //
 
-    // Define the data array
-    CLR_UINT8 data[] = { 0x01, 0x02};
-
-    // Initialize the retur value
-    CLR_RT_TypedArray_UINT8 retValue;
-    retValue.Set(data, 2);
+    param1[0] = 0x01;
+    param1[1] = 0x02;
 
     // implementation ends here   //
     ////////////////////////////////
-
-    return retValue;
 }

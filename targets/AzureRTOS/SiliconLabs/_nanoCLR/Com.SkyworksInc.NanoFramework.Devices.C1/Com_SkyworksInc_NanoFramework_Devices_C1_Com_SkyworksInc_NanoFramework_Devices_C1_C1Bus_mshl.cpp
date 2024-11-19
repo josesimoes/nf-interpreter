@@ -12,7 +12,7 @@
 using namespace Com_SkyworksInc_NanoFramework_Devices_C1::Com_SkyworksInc_NanoFramework_Devices_C1;
 
 
-HRESULT Library_Com_SkyworksInc_NanoFramework_Devices_C1_Com_SkyworksInc_NanoFramework_Devices_C1_C1Bus::NativeTransmitWrite___SZARRAY_U1__U1__U1( CLR_RT_StackFrame& stack )
+HRESULT Library_Com_SkyworksInc_NanoFramework_Devices_C1_Com_SkyworksInc_NanoFramework_Devices_C1_C1Bus::NativeTransmitWrite___VOID__U1__U1__SZARRAY_U1( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER(); hr = S_OK;
     {
@@ -23,14 +23,17 @@ HRESULT Library_Com_SkyworksInc_NanoFramework_Devices_C1_Com_SkyworksInc_NanoFra
         uint8_t param1;
         NANOCLR_CHECK_HRESULT( Interop_Marshal_UINT8( stack, 2, param1 ) );
 
-        CLR_RT_TypedArray_UINT8 retValue = C1Bus::NativeTransmitWrite( param0, param1, hr );
+        CLR_RT_TypedArray_UINT8 param2;
+        NANOCLR_CHECK_HRESULT( Interop_Marshal_UINT8_ARRAY( stack, 3, param2 ) );
+
+        C1Bus::NativeTransmitWrite( param0, param1, param2, hr );
         NANOCLR_CHECK_HRESULT( hr );
-        SetResult_UINT8_ARRAY( stack, retValue );
+
     }
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_Com_SkyworksInc_NanoFramework_Devices_C1_Com_SkyworksInc_NanoFramework_Devices_C1_C1Bus::NativeTransmitRead___SZARRAY_U1__U1( CLR_RT_StackFrame& stack )
+HRESULT Library_Com_SkyworksInc_NanoFramework_Devices_C1_Com_SkyworksInc_NanoFramework_Devices_C1_C1Bus::NativeTransmitRead___VOID__U1__SZARRAY_U1( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER(); hr = S_OK;
     {
@@ -38,9 +41,12 @@ HRESULT Library_Com_SkyworksInc_NanoFramework_Devices_C1_Com_SkyworksInc_NanoFra
         uint8_t param0;
         NANOCLR_CHECK_HRESULT( Interop_Marshal_UINT8( stack, 1, param0 ) );
 
-        CLR_RT_TypedArray_UINT8 retValue = C1Bus::NativeTransmitRead( param0, hr );
+        CLR_RT_TypedArray_UINT8 param1;
+        NANOCLR_CHECK_HRESULT( Interop_Marshal_UINT8_ARRAY( stack, 2, param1 ) );
+
+        C1Bus::NativeTransmitRead( param0, param1, hr );
         NANOCLR_CHECK_HRESULT( hr );
-        SetResult_UINT8_ARRAY( stack, retValue );
+
     }
     NANOCLR_NOCLEANUP();
 }

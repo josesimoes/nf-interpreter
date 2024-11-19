@@ -18,8 +18,8 @@ struct Library_Com_SkyworksInc_NanoFramework_Devices_C1_Com_SkyworksInc_NanoFram
     static const int FIELD___syncLock = 1;
     static const int FIELD___buffer = 2;
 
-    NANOCLR_NATIVE_DECLARE(NativeTransmitWrite___SZARRAY_U1__U1__U1);
-    NANOCLR_NATIVE_DECLARE(NativeTransmitRead___SZARRAY_U1__U1);
+    NANOCLR_NATIVE_DECLARE(NativeTransmitWrite___VOID__U1__U1__SZARRAY_U1);
+    NANOCLR_NATIVE_DECLARE(NativeTransmitRead___VOID__U1__SZARRAY_U1);
 
     //--//
 };
