@@ -13,7 +13,7 @@ list(APPEND Com.SkyworksInc.NanoFramework.Devices.C1_INCLUDE_DIRS ${CMAKE_SOURCE
 list(APPEND Com.SkyworksInc.NanoFramework.Devices.C1_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/HAL/Include)
 list(APPEND Com.SkyworksInc.NanoFramework.Devices.C1_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/Include)
 list(APPEND Com.SkyworksInc.NanoFramework.Devices.C1_INCLUDE_DIRS ${BASE_PATH_FOR_THIS_MODULE})
-list(APPEND Com.SkyworksInc.NanoFramework.Devices.I2c_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/Com.SkyworksInc.NanoFramework.Devices.C1)
+list(APPEND Com.SkyworksInc.NanoFramework.Devices.C1_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/Com.SkyworksInc.NanoFramework.Devices.C1)
 
 
 # source files
