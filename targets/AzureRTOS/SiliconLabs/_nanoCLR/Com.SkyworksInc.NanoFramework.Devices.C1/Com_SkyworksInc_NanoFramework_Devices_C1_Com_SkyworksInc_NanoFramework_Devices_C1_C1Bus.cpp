@@ -28,6 +28,10 @@ void C1Bus::NativeTransmitWrite( uint8_t param0, uint8_t param1, CLR_RT_TypedArr
     ////////////////////////////////
     // implementation starts here //
 
+    // param0 is register address
+    // param1 is write value for address
+    // param2 is response array
+
 
     // implementation ends here   //
     ////////////////////////////////
@@ -45,6 +49,9 @@ void C1Bus::NativeTransmitRead( uint8_t param0, CLR_RT_TypedArray_UINT8 param1, 
 
     ////////////////////////////////
     // implementation starts here //
+
+    // param0 is register address
+    // param1 is response array
 
     param1[0] = 0x01;
     param1[1] = 0x02;
