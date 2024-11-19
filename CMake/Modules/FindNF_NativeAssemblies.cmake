@@ -467,7 +467,7 @@ ParseInteropAssemblies()
 ##################################
 # add parsing of private APIs here
 
-# Com.SkyworksInc.NanoFramework.Devices.I2c
+# Com.SkyworksInc.NanoFramework.Devices.C1
 if(API_Com.SkyworksInc.NanoFramework.Devices.C1)
     ##### API name here (doted name)
     PerformSettingsForApiEntry("Com.SkyworksInc.NanoFramework.Devices.C1")
