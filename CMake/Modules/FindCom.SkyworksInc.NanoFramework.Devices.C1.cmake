@@ -20,8 +20,7 @@ list(APPEND Com.SkyworksInc.NanoFramework.Devices.C1_INCLUDE_DIRS ${CMAKE_SOURCE
 set(Com.SkyworksInc.NanoFramework.Devices.C1_SRCS
 
     Com_SkyworksInc_NanoFramework_Devices_C1.cpp
-
-
+    Com_SkyworksInc_NanoFramework_Devices_C1_C1Instruction.cpp
     Com_SkyworksInc_NanoFramework_Devices_C1_Com_SkyworksInc_NanoFramework_Devices_C1_C1Bus_mshl.cpp
     Com_SkyworksInc_NanoFramework_Devices_C1_Com_SkyworksInc_NanoFramework_Devices_C1_C1Bus.cpp
 
