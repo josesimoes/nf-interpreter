@@ -12,11 +12,6 @@ C1Instruction::C1Instruction(C1InstructionName t, int s1, int s2)
     states[1] = s2;
 }
 
-void C1Instruction::print() const 
-{
-    std::cout << "Instruction: " << instructionType << ", State1: " << states[0] << ", State2: " << states[1] << std::endl;
-}
-
 C1Instruction* fetchInstruction(std::map<C1InstructionName, C1Instruction>& instructions, C1InstructionName name) 
 {
     auto it = instructions.find(name);

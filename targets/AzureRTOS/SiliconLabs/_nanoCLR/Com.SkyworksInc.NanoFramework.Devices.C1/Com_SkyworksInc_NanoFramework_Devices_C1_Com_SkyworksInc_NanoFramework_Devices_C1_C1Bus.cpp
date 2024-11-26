@@ -58,6 +58,7 @@ void Handle_Address_Read(int index, uint8_t* data, C1_States nextState);
 void Handle_Address_Write(int index, uint8_t* data, C1_States nextState);
 void Set_Nth_Bit(uint8_t &data, int n, bool logicValue);
 int Get_Nth_Bit(uint8_t data, int n);
+int Get_Instruction_Value(C1InstructionName instructionType, int index);
 
 // current and previous state place holders
 volatile enum C1_States currentState = STATE_INIT;
@@ -66,7 +67,7 @@ volatile enum C1_States previousState = STATE_INIT;
 GPIO_Port_TypeDef gpioPort = gpioPortB;
 unsigned int gpioPin = 10;
 
-C1InstructionName instruction;
+volatile C1InstructionName instruction;
 
 uint8_t transfer_data = 0;
 
@@ -74,19 +75,19 @@ uint8_t transfer_data = 0;
 std::map<C1InstructionName, C1Instruction> instructions;
 
 // allow us to only run init function once
-int ignoreInit = 0;
+volatile int ignoreInit = 0;
 
 // Logical 1 is three times the duration of logical 0, therefore we need to wait 3 periods
 // we will use this variable as a counter for the number of periods we have waited.
-int writeLogical1 = 0;
+volatile int writeLogical1 = 0;
 
 // Count to help iterate the read sequence of a bit
-int readCount = 0;
+volatile int readCount = 0;
 
-bool toggleGPIO = false;
+volatile bool toggleGPIO = false;
 
 // keeps count of toggling the GPIO, if even it means we drive low, if odd it means we drive high 
-int pinModeToggle = 0;
+volatile int pinModeToggle = 0;
 
 void C1Bus::NativeTransmitWrite(uint8_t param0, uint8_t param1, CLR_RT_TypedArray_UINT8 param2, HRESULT &hr)
 {
@@ -131,7 +132,7 @@ void C1Bus::NativeTransmitRead(uint8_t param0, CLR_RT_TypedArray_UINT8 param1, H
     setupTimer();
 
     // Wait for the state machine to finish
-    while(currentState == STATE_END){}
+    while(currentState != STATE_END){}
 
     param1[0] = 0x01;
     param1[1] = 0x03;
@@ -175,6 +176,27 @@ void setupGPIO()
 
 void setupTimer()
 {
+    // CMU->HFPERCLKEN0 |= CMU_HFPERCLKEN0_TIMER0;
+    // // Enable clock for TIMER0
+    // CMU_ClockEnable(cmuClock_TIMER0, true);
+
+    // // Initialize the TIMER
+    // TIMER_Init_TypeDef timerInit = TIMER_INIT_DEFAULT;
+    // timerInit.prescale = timerPrescale1;
+    // TIMER_Init(TIMER0, &timerInit);
+
+    // // uint32_t timerFreq = CMU_ClockFreqGet(cmuClock_HFPER);
+    // // uint32_t topValue = (timerFreq / 1e6) * 2; // 2000 ns
+    // uint32_t topValue = 9;
+    // TIMER_TopSet(TIMER0, topValue);
+
+    // // Enable TIMER0 interrupt
+    // // TIMER_IntEnable(TIMER0, TIMER_IEN_OF);
+    // TIMER_IntEnable(TIMER0, TIMER_IF_OF);
+    // NVIC_EnableIRQ(TIMER0_IRQn);
+
+    // TIMER_Enable(TIMER0, true);
+
     // Enable clock for TIMER0
     CMU_ClockEnable(cmuClock_TIMER0, true);
 
@@ -185,7 +207,7 @@ void setupTimer()
 
     // Set the TIMER Top value for 80 microseconds period
     uint32_t timerFreq = CMU_ClockFreqGet(cmuClock_HFPER);
-    uint32_t topValue = (timerFreq / 1e9) * 200; // 200 ns
+    uint32_t topValue = (timerFreq / 1e6) * 2; // 80 microseconds
     TIMER_TopSet(TIMER0, topValue);
 
     // Enable TIMER0 interrupt
@@ -204,33 +226,40 @@ void TIMER0_IRQHandler()
     {
         case STATE_INIT:
             currentState = START_1;
+            toggleGPIO = true;
             break;
         case START_1:
+            toggleGPIO = true;
             currentState = START_2;
             break;
         case START_2:
+            toggleGPIO = true;
             currentState = ADDRESS_FOLLOW;
             break;
         case ADDRESS_FOLLOW:
+            toggleGPIO = true;
             currentState = SLOW_ACCESS;
             break;
         case SLOW_ACCESS:
+            toggleGPIO = true;
             currentState = INSTRUCTION_1;
             break;
         case INSTRUCTION_1:
             Handle_Instruction_Write(instruction, 0, INSTRUCTION_2);
             break;
         case INSTRUCTION_2:
-            Handle_Instruction_Write(instruction, 0, INCREMENT);
+            Handle_Instruction_Write(instruction, 1, INCREMENT);
             break;
         case INCREMENT:
             currentState = DATA_1;
             break;
         case DATA_1:
+            readCount = 0;
             Handle_Data_State(instruction, 0, &transfer_data, DATA_2);
             break;
         case DATA_2:
-            Handle_Data_State(instruction, 1, &transfer_data, DATA_3);
+            readCount = 0;
+            Handle_Data_State(instruction, 1, &transfer_data, STATE_END);
             break;
         case DATA_3:
             Handle_Data_State(instruction, 2, &transfer_data, DATA_4);
@@ -252,11 +281,14 @@ void TIMER0_IRQHandler()
             currentState = STATE_END;
             break;
         case STATE_END:
+            toggleGPIO = false;
+            GPIO_PinOutSet(gpioPort, gpioPin);      // set pin to high
             TIMER_Enable(TIMER0, false);
             break;
 
         default:
             // Default actions
+            TIMER_Enable(TIMER0, false);
             break;  
     }
 
@@ -272,10 +304,46 @@ void gpioPinToggle()
         GPIO_PinOutClear(gpioPort, gpioPin);    // drives pin low
     }
     else {
-        GPIO_PinOutSet(gpioPort, gpioPin); // drives pin high (with internal pull-up)
+        GPIO_PinOutSet(gpioPort, gpioPin);      // drives pin high (with internal pull-up)
     }
 
     pinModeToggle++;
+}
+
+void Handle_Instruction_Write(C1InstructionName instructionType, int index, C1_States nextState)
+{
+    // C1Instruction* inst = fetchInstruction(instructions, instructionType);
+
+    // if(inst == nullptr) {
+    //     return;
+    // }
+
+    int instr_value = Get_Instruction_Value(instructionType, index);
+
+    if(instr_value == 1 && writeLogical1 < 3) {
+        writeLogical1++;
+        toggleGPIO = false;
+    }
+    else {
+        writeLogical1 = 0;
+        toggleGPIO = true;
+        currentState = nextState;
+    }
+}
+
+int Get_Instruction_Value(C1InstructionName instructionType, int index)
+{
+    if(instructionType == DATA_READ)
+    {
+        if(index == 0) {
+            return 0;
+        }
+        else {
+            return 1;
+        }
+    }
+    
+    return -1;
 }
 
 void Handle_Data_State(C1InstructionName instructionType, int index, uint8_t* data, C1_States nextState) 
@@ -383,21 +451,4 @@ void Set_Nth_Bit(uint8_t &data, int n, bool logicValue)
     }
 }
 
-void Handle_Instruction_Write(C1InstructionName instructionType, int index, C1_States nextState)
-{
-    C1Instruction* inst = fetchInstruction(instructions, instructionType);
 
-    if(inst == nullptr) {
-        return;
-    }
-
-    if(inst->states[index] == 1 && writeLogical1 < 3) {
-        writeLogical1++;
-        toggleGPIO = false;
-    }
-    else {
-        writeLogical1 = 0;
-        toggleGPIO = true;
-        currentState = nextState;
-    }
-}

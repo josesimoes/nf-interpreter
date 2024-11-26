@@ -2,7 +2,6 @@
 #ifndef C1INSTRUCTION_H
 #define C1INSTRUCTION_H
 
-#include <iostream>
 #include <map>
 
 // Enum for instruction names
@@ -21,8 +20,6 @@ public:
 
     C1Instruction();
     C1Instruction(C1InstructionName t, int s1, int s2);
-
-    void print() const;
 };
 
 // Function to fetch instruction from map (dictionary)
