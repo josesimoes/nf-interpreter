@@ -2,14 +2,12 @@
 #ifndef C1INSTRUCTION_H
 #define C1INSTRUCTION_H
 
-#include <map>
-
 // Enum for instruction names
 enum C1InstructionName {
-    DATA_WRITE,
-    DATA_READ,
-    ADDRESS_WRITE,
-    ADDRESS_READ
+    DATA_WRITE = 0,
+    DATA_READ = 1,
+    ADDRESS_WRITE = 2,
+    ADDRESS_READ = 3
 };
 
 // Instruction class definition
@@ -21,8 +19,5 @@ public:
     C1Instruction();
     C1Instruction(C1InstructionName t, int s1, int s2);
 };
-
-// Function to fetch instruction from map (dictionary)
-C1Instruction* fetchInstruction(std::map<C1InstructionName, C1Instruction>& instructions, C1InstructionName name);
 
 #endif // C1INSTRUCTION_H
