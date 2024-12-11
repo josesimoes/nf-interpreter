@@ -108,6 +108,50 @@ void C1Bus::NativeTransmitWrite(uint8_t param0, uint8_t param1, CLR_RT_TypedArra
     // param1 is write value for address
     // param2 is response array
 
+    init();
+    setupGPIO();
+
+    transfer_data = 0;
+    bitToRead = 0;
+
+    setupTimer();
+
+    /*
+     *  First address write
+     */
+    // Reset state machine for the next run currentState = STATE_INIT;
+    instruction = ADDRESS_WRITE;
+    currentState = STATE_INIT;
+    previousState = STATE_INIT;
+    transfer_data = param0;
+    TIMER_Enable(TIMER0, true);     // Start TIMER0
+
+    // Wait for the state machine to finish
+    while(currentState != STATE_END){}
+
+    // Wait in between Address Write and Data Read
+
+    for (volatile uint32_t i = 0; i < 64; i++) {
+        // Empty loop to create delay
+    }
+
+    /*
+     *  Second data read
+     */
+    // Reset state machine for the next run currentState = STATE_INIT;
+    instruction = DATA_WRITE;
+    currentState = STATE_INIT;
+    previousState = STATE_INIT;
+    transfer_data = param1;
+    TIMER_Enable(TIMER0, true);     // Start TIMER0
+
+    // Wait for the state machine to finish
+    while(currentState != STATE_END){}
+
+    param2[0] = 0x01;
+
+    cleanUp();
+
     // implementation ends here   //
     ////////////////////////////////
 }
