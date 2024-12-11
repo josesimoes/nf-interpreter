@@ -16,7 +16,6 @@
 #include "em_cmu.h"
 #include "em_gpio.h"
 #include "em_timer.h"
-#include <map>
 #include <Com_SkyworksInc_NanoFramework_Devices_C1_C1Instruction.h>
 #include "Com_SkyworksInc_NanoFramework_Devices_C1.h"
 #include "Com_SkyworksInc_NanoFramework_Devices_C1_Com_SkyworksInc_NanoFramework_Devices_C1_C1Bus.h"
@@ -93,7 +92,7 @@ volatile int bitToRead = 0;
 
 volatile int tRest = 0;
 
-void C1Bus::NativeTransmitWrite(uint8_t param0, uint8_t param1, CLR_RT_TypedArray_UINT8 param2, HRESULT &hr)
+void C1Bus::NativeTransmitWriteWithAddress( uint8_t param0, uint8_t param1, CLR_RT_TypedArray_UINT8 param2, HRESULT &hr )
 {
 
     (void)param0;
@@ -156,7 +155,7 @@ void C1Bus::NativeTransmitWrite(uint8_t param0, uint8_t param1, CLR_RT_TypedArra
     ////////////////////////////////
 }
 
-void C1Bus::NativeTransmitRead(uint8_t param0, CLR_RT_TypedArray_UINT8 param1, HRESULT &hr)
+void C1Bus::NativeTransmitReadWithAddress( uint8_t param0, CLR_RT_TypedArray_UINT8 param1, HRESULT &hr )
 {
 
     (void)param0;
@@ -216,6 +215,161 @@ void C1Bus::NativeTransmitRead(uint8_t param0, CLR_RT_TypedArray_UINT8 param1, H
 
     // implementation ends here   //
     ////////////////////////////////
+}
+
+void C1Bus::NativeTransmitRead( CLR_RT_TypedArray_UINT8 param0, HRESULT &hr )
+{
+
+    (void)param0;       // response array
+    (void)hr;
+
+
+    ////////////////////////////////
+    // implementation starts here //
+
+    init();
+    setupGPIO();
+
+    transfer_data = 0;
+    bitToRead = 0;
+
+    setupTimer();
+
+        // Reset state machine for the next run currentState = STATE_INIT;
+    instruction = DATA_READ;
+    currentState = STATE_INIT;
+    previousState = STATE_INIT;
+    transfer_data = 0;
+    TIMER_Enable(TIMER0, true);     // Start TIMER0
+
+    // Wait for the state machine to finish
+    while(currentState != STATE_END){}
+
+    param0[0] = 0x01;
+    param0[1] = transfer_data;
+
+    cleanUp();
+    
+    // implementation ends here   //
+    ////////////////////////////////
+
+
+}
+
+void C1Bus::NativeTransmitWrite( uint8_t param0, CLR_RT_TypedArray_UINT8 param1, HRESULT &hr )
+{
+
+    (void)param0;       // writeValue
+    (void)param1;       // reponse array
+    (void)hr;
+
+
+    ////////////////////////////////
+    // implementation starts here //
+
+    init();
+    setupGPIO();
+
+    transfer_data = 0;
+    bitToRead = 0;
+
+    setupTimer();
+
+    // Reset state machine for the next run currentState = STATE_INIT;
+    instruction = DATA_WRITE;
+    currentState = STATE_INIT;
+    previousState = STATE_INIT;
+    transfer_data = param0;
+    TIMER_Enable(TIMER0, true);     // Start TIMER0
+
+    // Wait for the state machine to finish
+    while(currentState != STATE_END){}
+
+    param1[0] = 0x01;
+
+    cleanUp();
+
+    // implementation ends here   //
+    ////////////////////////////////
+
+
+}
+
+void C1Bus::NativeTransmitWriteAddress( uint8_t param0, CLR_RT_TypedArray_UINT8 param1, HRESULT &hr )
+{
+
+    (void)param0;       // addressValue
+    (void)param1;       // response array
+    (void)hr;
+
+
+    ////////////////////////////////
+    // implementation starts here //
+
+    init();
+    setupGPIO();
+
+    transfer_data = 0;
+    bitToRead = 0;
+
+    setupTimer();
+
+    // Reset state machine for the next run currentState = STATE_INIT;
+    instruction = ADDRESS_WRITE;
+    currentState = STATE_INIT;
+    previousState = STATE_INIT;
+    transfer_data = param0;
+    TIMER_Enable(TIMER0, true);     // Start TIMER0
+
+    // Wait for the state machine to finish
+    while(currentState != STATE_END){}
+
+    param1[0] = 0x01;
+
+    cleanUp();
+    // implementation ends here   //
+    ////////////////////////////////
+
+
+}
+
+void C1Bus::NativeTransmitReadAddress( CLR_RT_TypedArray_UINT8 param0, HRESULT &hr )
+{
+
+    (void)param0;       // response array
+    (void)hr;
+
+
+    ////////////////////////////////
+    // implementation starts here //
+
+    init();
+    setupGPIO();
+
+    transfer_data = 0;
+    bitToRead = 0;
+
+    setupTimer();
+
+    // Reset state machine for the next run currentState = STATE_INIT;
+    instruction = ADDRESS_WRITE;
+    currentState = STATE_INIT;
+    previousState = STATE_INIT;
+    transfer_data = 0x00;
+    TIMER_Enable(TIMER0, true);     // Start TIMER0
+
+    // Wait for the state machine to finish
+    while(currentState != STATE_END){}
+
+    param0[0] = 0x01;
+    param0[1] = transfer_data;
+
+    cleanUp();
+
+    // implementation ends here   //
+    ////////////////////////////////
+
+
 }
 
 void init()

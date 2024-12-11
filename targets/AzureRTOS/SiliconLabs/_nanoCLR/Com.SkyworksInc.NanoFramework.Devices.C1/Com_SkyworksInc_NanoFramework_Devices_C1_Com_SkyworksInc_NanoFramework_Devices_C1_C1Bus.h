@@ -30,9 +30,17 @@ namespace Com_SkyworksInc_NanoFramework_Devices_C1
             // Helper Functions to access fields of managed object
             // Declaration of stubs. These functions are implemented by Interop code developers
 
-            static void NativeTransmitWrite( uint8_t param0, uint8_t param1, CLR_RT_TypedArray_UINT8 param2, HRESULT &hr );
+            static void NativeTransmitWriteWithAddress( uint8_t param0, uint8_t param1, CLR_RT_TypedArray_UINT8 param2, HRESULT &hr );
 
-            static void NativeTransmitRead( uint8_t param0, CLR_RT_TypedArray_UINT8 param1, HRESULT &hr );
+            static void NativeTransmitReadWithAddress( uint8_t param0, CLR_RT_TypedArray_UINT8 param1, HRESULT &hr );
+
+            static void NativeTransmitRead( CLR_RT_TypedArray_UINT8 param0, HRESULT &hr );
+
+            static void NativeTransmitWrite( uint8_t param0, CLR_RT_TypedArray_UINT8 param1, HRESULT &hr );
+
+            static void NativeTransmitWriteAddress( uint8_t param0, CLR_RT_TypedArray_UINT8 param1, HRESULT &hr );
+
+            static void NativeTransmitReadAddress( CLR_RT_TypedArray_UINT8 param0, HRESULT &hr );
 
         };
     }
