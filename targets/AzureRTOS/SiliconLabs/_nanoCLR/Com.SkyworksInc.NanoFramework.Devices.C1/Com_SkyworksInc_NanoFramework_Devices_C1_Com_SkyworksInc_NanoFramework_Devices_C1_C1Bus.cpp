@@ -51,11 +51,12 @@ enum C1_States
 };
 
 void init();
+void init_instruction(C1InstructionName instructionType);
 void setupTimer();
 void setupGPIO();
 void TIMER0_IRQHandler();
 void cleanUp(); 
-void Handle_Instruction_Write(C1InstructionName instructionType, int index, C1_States nextState);
+void Handle_Instruction_Write(int instr_value, int index, C1_States nextState);
 void Handle_Data_Write(int index, uint8_t* data, C1_States nextState);
 void Set_Nth_Bit(uint8_t &data, int n, bool logicValue);
 int Get_Nth_Bit(uint8_t data, int n);
@@ -92,6 +93,9 @@ volatile int bitToRead = 0;
 
 volatile int tRest = 0;
 
+volatile int instruction_0 = 0;
+volatile int instruction_1 = 0;
+
 void C1Bus::NativeTransmitWriteWithAddress( uint8_t param0, uint8_t param1, CLR_RT_TypedArray_UINT8 param2, HRESULT &hr )
 {
 
@@ -123,6 +127,7 @@ void C1Bus::NativeTransmitWriteWithAddress( uint8_t param0, uint8_t param1, CLR_
     currentState = STATE_INIT;
     previousState = STATE_INIT;
     transfer_data = param0;
+    init_instruction(instruction);
     TIMER_Enable(TIMER0, true);     // Start TIMER0
 
     // Wait for the state machine to finish
@@ -142,6 +147,8 @@ void C1Bus::NativeTransmitWriteWithAddress( uint8_t param0, uint8_t param1, CLR_
     currentState = STATE_INIT;
     previousState = STATE_INIT;
     transfer_data = param1;
+
+    init_instruction(instruction);
     TIMER_Enable(TIMER0, true);     // Start TIMER0
 
     // Wait for the state machine to finish
@@ -184,6 +191,7 @@ void C1Bus::NativeTransmitReadWithAddress( uint8_t param0, CLR_RT_TypedArray_UIN
     currentState = STATE_INIT;
     previousState = STATE_INIT;
     transfer_data = param0;
+    init_instruction(instruction);
     TIMER_Enable(TIMER0, true);     // Start TIMER0
 
     // Wait for the state machine to finish
@@ -203,6 +211,7 @@ void C1Bus::NativeTransmitReadWithAddress( uint8_t param0, CLR_RT_TypedArray_UIN
     currentState = STATE_INIT;
     previousState = STATE_INIT;
     transfer_data = 0;
+    init_instruction(instruction);
     TIMER_Enable(TIMER0, true);     // Start TIMER0
 
     // Wait for the state machine to finish
@@ -240,6 +249,7 @@ void C1Bus::NativeTransmitRead( CLR_RT_TypedArray_UINT8 param0, HRESULT &hr )
     currentState = STATE_INIT;
     previousState = STATE_INIT;
     transfer_data = 0;
+    init_instruction(instruction);
     TIMER_Enable(TIMER0, true);     // Start TIMER0
 
     // Wait for the state machine to finish
@@ -280,6 +290,7 @@ void C1Bus::NativeTransmitWrite( uint8_t param0, CLR_RT_TypedArray_UINT8 param1,
     currentState = STATE_INIT;
     previousState = STATE_INIT;
     transfer_data = param0;
+    init_instruction(instruction);
     TIMER_Enable(TIMER0, true);     // Start TIMER0
 
     // Wait for the state machine to finish
@@ -319,6 +330,7 @@ void C1Bus::NativeTransmitWriteAddress( uint8_t param0, CLR_RT_TypedArray_UINT8 
     currentState = STATE_INIT;
     previousState = STATE_INIT;
     transfer_data = param0;
+    init_instruction(instruction);
     TIMER_Enable(TIMER0, true);     // Start TIMER0
 
     // Wait for the state machine to finish
@@ -352,10 +364,11 @@ void C1Bus::NativeTransmitReadAddress( CLR_RT_TypedArray_UINT8 param0, HRESULT &
     setupTimer();
 
     // Reset state machine for the next run currentState = STATE_INIT;
-    instruction = ADDRESS_WRITE;
+    instruction = ADDRESS_READ;
     currentState = STATE_INIT;
     previousState = STATE_INIT;
     transfer_data = 0x00;
+    init_instruction(instruction);
     TIMER_Enable(TIMER0, true);     // Start TIMER0
 
     // Wait for the state machine to finish
@@ -374,6 +387,8 @@ void C1Bus::NativeTransmitReadAddress( CLR_RT_TypedArray_UINT8 param0, HRESULT &
 
 void init()
 {
+    
+
     if(ignoreInit > 0) {
         return;
     }
@@ -384,6 +399,12 @@ void init()
     instructions[ADDRESS_READ] = C1Instruction(ADDRESS_READ, 1, 1);
 
     ignoreInit++;
+}
+
+void init_instruction(C1InstructionName instructionType) {
+    // get instruction bit 0 and bit 1
+    instruction_0 = instructions[instructionType].states[0];
+    instruction_1 = instructions[instructionType].states[1];
 }
 
 void setupGPIO()
@@ -462,10 +483,10 @@ void TIMER0_IRQHandler()
             currentState = INSTRUCTION_1;
             break;
         case INSTRUCTION_1:
-            Handle_Instruction_Write(instruction, 0, INSTRUCTION_2);
+            Handle_Instruction_Write(instruction_0, 0, INSTRUCTION_2);
             break;
         case INSTRUCTION_2:
-            Handle_Instruction_Write(instruction, 1, INCREMENT);
+            Handle_Instruction_Write(instruction_1, 1, INCREMENT);
             break;
         case INCREMENT:
             GPIO_SIGNAL(0);
@@ -600,16 +621,9 @@ void TIMER0_IRQHandler()
     
 }
 
-void Handle_Instruction_Write(C1InstructionName instructionType, int index, C1_States nextState)
+void Handle_Instruction_Write(int instr_value, int index, C1_States nextState)
 {
-    int instr_value = instructions[instructionType].states[index];
-
-    if((index % 2) == 0) {
-        GPIO_SIGNAL(0);
-    }
-    else {
-        GPIO_SIGNAL(1);
-    }
+    GPIO_SIGNAL(index);
 
     if(instr_value == 1 && writeLogical1 < 3) {
         writeLogical1++;
