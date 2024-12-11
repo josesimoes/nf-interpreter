@@ -234,9 +234,6 @@ void setupTimer()
     // Enable TIMER0 interrupts
     TIMER_IntEnable(TIMER0, TIMER_IF_OF);  // Enable overflow interrupt
     NVIC_EnableIRQ(TIMER0_IRQn);
-
-    
-
 }
 
 void TIMER0_IRQHandler()
@@ -346,7 +343,6 @@ void TIMER0_IRQHandler()
                     }
                 }
             }
-                
             break;
         case READ_6:
             // set pin to low
@@ -367,40 +363,30 @@ void TIMER0_IRQHandler()
                     currentState = STATE_END;
                 }
             }
-
-            
             break;
         case DATA_1:
             Handle_Data_Write(0, &transfer_data, DATA_2);
-            currentState = DATA_2;
             break;
         case DATA_2:
             Handle_Data_Write(1, &transfer_data, DATA_3);
-            currentState = DATA_3;
             break;
         case DATA_3:
             Handle_Data_Write(2, &transfer_data, DATA_4);
-            currentState = DATA_4;
             break;
         case DATA_4:
             Handle_Data_Write(3, &transfer_data, DATA_5);
-            currentState = DATA_5;
             break;
         case DATA_5:
-            Handle_Data_Write(4, &transfer_data, DATA_6);\
-            currentState = DATA_6;
+            Handle_Data_Write(4, &transfer_data, DATA_6);
             break;
         case DATA_6:
             Handle_Data_Write(5, &transfer_data, DATA_7);
-            currentState = DATA_7;
             break;
         case DATA_7:
             Handle_Data_Write(6, &transfer_data, DATA_8);
-            currentState = DATA_8;
             break;
         case DATA_8:
             Handle_Data_Write(7, &transfer_data, STATE_END);
-            currentState = STATE_END;
             break;
         case STATE_END:
             GPIO_SIGNAL(1);
