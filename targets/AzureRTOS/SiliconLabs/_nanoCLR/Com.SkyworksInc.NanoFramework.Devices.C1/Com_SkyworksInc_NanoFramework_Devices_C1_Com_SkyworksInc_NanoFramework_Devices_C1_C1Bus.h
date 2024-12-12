@@ -13,13 +13,13 @@
 #ifndef COM_SKYWORKSINC_NANOFRAMEWORK_DEVICES_C1_COM_SKYWORKSINC_NANOFRAMEWORK_DEVICES_C1_COM_SKYWORKSINC_NANOFRAMEWORK_DEVICES_C1_C1BUS_H
 #define COM_SKYWORKSINC_NANOFRAMEWORK_DEVICES_C1_COM_SKYWORKSINC_NANOFRAMEWORK_DEVICES_C1_COM_SKYWORKSINC_NANOFRAMEWORK_DEVICES_C1_C1BUS_H
 
-#include "em_device.h"
+// #include "em_device.h"
 
-#define PB10_BIT            (1 << 10)
-#define GPIO_READ()         ((GPIO->P[1].DIN & PB10_BIT) ? 1 : 0)
+// #define PB10_BIT            (1 << 10)
+// #define GPIO_READ()         ((GPIO->P[1].DIN & PB10_BIT) ? 1 : 0)
 
-// GPIO_SIGNAL(0) = LOW, GPIO_SIGNAL(1) = HIGH
-#define GPIO_SIGNAL(value)  (value ? (GPIO->P[1].DOUT |= (1 << 10)) : (GPIO->P[1].DOUT &= ~(1 << 10)))
+// // GPIO_SIGNAL(0) = LOW, GPIO_SIGNAL(1) = HIGH
+// #define GPIO_SIGNAL(value)  (value ? (GPIO->P[1].DOUT |= (1 << 10)) : (GPIO->P[1].DOUT &= ~(1 << 10)))
 
 namespace Com_SkyworksInc_NanoFramework_Devices_C1
 {

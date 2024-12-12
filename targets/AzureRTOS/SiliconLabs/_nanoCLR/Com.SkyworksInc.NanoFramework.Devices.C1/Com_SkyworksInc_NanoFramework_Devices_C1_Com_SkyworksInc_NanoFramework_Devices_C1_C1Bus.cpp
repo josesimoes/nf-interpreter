@@ -19,6 +19,7 @@
 #include <Com_SkyworksInc_NanoFramework_Devices_C1_C1Instruction.h>
 #include "Com_SkyworksInc_NanoFramework_Devices_C1.h"
 #include "Com_SkyworksInc_NanoFramework_Devices_C1_Com_SkyworksInc_NanoFramework_Devices_C1_C1Bus.h"
+#include "Com_SkyworksInc_NanoFramework_Devices_C1_Native_Target.h"
 
 using namespace Com_SkyworksInc_NanoFramework_Devices_C1::Com_SkyworksInc_NanoFramework_Devices_C1;
 
@@ -65,8 +66,8 @@ int Get_Nth_Bit(uint8_t data, int n);
 volatile enum C1_States currentState = STATE_INIT;
 volatile enum C1_States previousState = STATE_INIT;
 
-GPIO_Port_TypeDef gpioPort = gpioPortB;
-unsigned int gpioPin = 10;
+// GPIO_Port_TypeDef gpioPort = gpioPortB;
+// unsigned int gpioPin = 10;
 
 volatile C1InstructionName instruction;
 
@@ -409,18 +410,15 @@ void init_instruction(C1InstructionName instructionType) {
 
 void setupGPIO()
 {
-    gpioPort = gpioPortB;
-    gpioPin = 10;
-
     // Enable clock for GPIO
     CMU_ClockEnable(cmuClock_GPIO, true);
 
     // Configure pin as push-pull output, the third argument makes it so when the gpio is CLEAR it
     // goes LOW and when SET it releases the pin the pull-up will drive it HIGH
-    GPIO_PinModeSet(gpioPort, gpioPin, gpioModeWiredAndPullUp, 1);
+    GPIO_PinModeSet(C1_GPIO_PORT, C1_GPIO_PIN, gpioModeWiredAndPullUp, 1);
 
     // Set the GPIO to HIGH
-    GPIO_PinOutSet(gpioPort, gpioPin);
+    GPIO_PinOutSet(C1_GPIO_PORT, C1_GPIO_PIN);
 }
 
 void cleanUp(void)
