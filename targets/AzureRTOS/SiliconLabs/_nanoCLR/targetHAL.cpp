@@ -20,7 +20,16 @@
 // #include <nf_device_can_native_target.h>
 // #endif
 #include <sys_dev_i2c_native_target.h>
+
+#ifndef GECKO_USE_SPI1
+#define GECKO_USE_SPI1 FALSE
+#endif
+#ifndef GECKO_USE_SPI2
+#define GECKO_USE_SPI2 FALSE
+#endif
+#if (GECKO_USE_SPI1 == TRUE) || (GECKO_USE_SPI2 == TRUE) 
 #include <sys_dev_spi_native_target.h>
+#endif
 // #if (HAL_USE_UART == TRUE)
 // #include <win_dev_serial_native_target.h>
 // #endif
