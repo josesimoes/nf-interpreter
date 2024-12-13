@@ -16,7 +16,7 @@
 #include "em_cmu.h"
 #include "em_gpio.h"
 #include "em_timer.h"
-#include <Com_SkyworksInc_NanoFramework_Devices_C1_C1Instruction.h>
+#include "Com_SkyworksInc_NanoFramework_Devices_C1_C1Instruction.h"
 #include "Com_SkyworksInc_NanoFramework_Devices_C1.h"
 #include "Com_SkyworksInc_NanoFramework_Devices_C1_Com_SkyworksInc_NanoFramework_Devices_C1_C1Bus.h"
 #include "Com_SkyworksInc_NanoFramework_Devices_C1_Native_Target.h"
