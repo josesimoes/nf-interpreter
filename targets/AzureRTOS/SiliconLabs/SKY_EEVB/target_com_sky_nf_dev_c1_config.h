@@ -3,4 +3,4 @@
 
 #define GECKO_USE_C1    TRUE
 #define C1_GPIO_PORT    gpioPortB
-#define C1_GPIO_PIN     10
+#define C1_GPIO_PIN     9
