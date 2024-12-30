@@ -29,7 +29,8 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Com_SkyworksInc_NanoFramework_Devices_C1 =
 {
     "Com.SkyworksInc.NanoFramework.Devices.C1",
-    0x3CD033AA,
+    // 0x3CD033AA,
+    0x3FCDA50E,
     method_lookup,
     { 1, 0, 0, 0 }
 };
