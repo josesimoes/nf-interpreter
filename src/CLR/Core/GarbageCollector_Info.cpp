@@ -210,7 +210,12 @@ bool CLR_RT_GarbageCollector::TestPointers_PopulateOld_Worker(void **ref)
 
     if (dst)
     {
-        RelocationRecord *ptr = new RelocationRecord();
+        RelocationRecord *ptr = platform_malloc(sizeof(RelocationRecord));
+
+        if (!ptr)
+        {
+            return false;
+        }
 
         s_lstRecords.push_back(ptr);
 
@@ -229,6 +234,8 @@ bool CLR_RT_GarbageCollector::TestPointers_PopulateOld_Worker(void **ref)
 #else
             CLR_Debug::Printf("Duplicate base OLD: %08x\r\n", ref);
 #endif
+            // need to free the memory allocated for the record
+            platform_free(ptr);
 
             NANOCLR_DEBUG_STOP();
         }
@@ -242,6 +249,9 @@ bool CLR_RT_GarbageCollector::TestPointers_PopulateOld_Worker(void **ref)
 #else
             CLR_Debug::Printf("Some data points into a free list: %08x\r\n", dst);
 #endif
+
+            // need to free the memory allocated for the record
+            platform_free(ptr);
 
             NANOCLR_DEBUG_STOP();
         }
@@ -259,7 +269,8 @@ void CLR_RT_GarbageCollector::TestPointers_PopulateOld()
     {
         RelocationRecord *ptr = *itLst;
 
-        delete ptr;
+        // need to free the memory allocated for the record
+        platform_free(ptr);
     }
 
     s_lstRecords.clear();
