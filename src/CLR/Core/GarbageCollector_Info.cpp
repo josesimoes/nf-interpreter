@@ -210,7 +210,7 @@ bool CLR_RT_GarbageCollector::TestPointers_PopulateOld_Worker(void **ref)
 
     if (dst)
     {
-        RelocationRecord *ptr = platform_malloc(sizeof(RelocationRecord));
+        RelocationRecord *ptr = (RelocationRecord *)platform_malloc(sizeof(RelocationRecord));
 
         if (!ptr)
         {
