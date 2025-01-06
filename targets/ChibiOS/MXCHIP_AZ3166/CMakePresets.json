@@ -15,11 +15,9 @@
             ],
             "hidden": false,
             "cacheVariables": {
-                "TARGET_BOARD": "${presetName}",
-                "RTOS": "ChibiOS",
+                "TARGET_BOARD": "MXCHIP_AZ3166",
                 "TARGET_SERIES": "STM32F4xx",
-                "USE_RNG": "ON",
-                "DP_FLOATINGPOINT": "OFF",
+                "RTOS": "ChibiOS",
                 "SUPPORT_ANY_BASE_CONVERSION": "OFF",
                 "SWO_OUTPUT": "OFF",
                 "NF_BUILD_RTM": "OFF",
