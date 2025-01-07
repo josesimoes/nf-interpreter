@@ -17,6 +17,7 @@ nf_setup_target_build(
 
     CLR_EXTRA_COMPILE_DEFINITIONS
         -DRUNTIME_MEMORY_PROFILE__extrasmall=1
+        -DTARGET_MXCHIP_AZ3166=1
    
     BOOTER_EXTRA_LINKMAP_PROPERTIES
         ",--library-path=${CMAKE_SOURCE_DIR}/targets/ChibiOS/_common,--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x400,--defsym=__crt_heap_size__=0x1000"
