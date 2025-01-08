@@ -191,6 +191,18 @@ macro(nf_add_platform_dependencies target)
         # nF feature: networking
         if(USE_NETWORKING_OPTION)
 
+            # fake lwIP sources for MXCHIP_AZ3166
+            if(${TARGET_BOARD} STREQUAL "MXCHIP_AZ3166")
+                set(lWIP_SOURCES "")
+            endif()
+
+            # MXCHIP_AZ3166 doesn't use ChibiOS MAC driver
+            if(NOT ${TARGET_BOARD} STREQUAL "MXCHIP_AZ3166")
+                set(NETWORK_COMPILE_DEFS -DHAL_USE_MAC=TRUE)
+            else()
+                set(NETWORK_COMPILE_DEFS "")
+            endif()
+
             nf_add_lib_network(
                 BUILD_TARGET
                     ${target}
@@ -206,7 +218,8 @@ macro(nf_add_platform_dependencies target)
                     ${CHIBIOS_FATFS_INCLUDE_DIRS}
                     ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
                     ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
-                EXTRA_COMPILE_DEFINITIONS -DHAL_USE_MAC=TRUE)
+                EXTRA_COMPILE_DEFINITIONS 
+                    ${NETWORK_COMPILE_DEFS})
 
             add_dependencies(${target}.elf nano::NF_Network)
 

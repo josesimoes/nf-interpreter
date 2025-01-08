@@ -309,6 +309,59 @@ if(RTOS_AZURERTOS_CHECK)
         ${BSD_SOURCE_FILE}
         "${BSD_SOURCE_FILE_FINAL_CONTENTS}")
 
+#############################
+## ChibiOS with MXCHIP AZ3166
+elseif(RTOS_CHIBIOS_CHECK AND ${TARGET_BOARD} STREQUAL "MXCHIP_AZ3166")
+    
+    # set include directories for nanoFramework network
+    # list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl)
+    # list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_common/NetX)
+    list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_common/include)
+    list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/ChibiOS/${TARGET_BOARD})
+    list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/ChibiOS)
+
+    # source files for nanoFramework Networking
+    set(NF_Network_SRCS
+
+        # platform specific
+        Target_Network.cpp
+        targetHAL_Network.cpp
+    )
+
+    # add source files 
+    foreach(SRC_FILE ${NF_Network_SRCS})
+
+        set(NF_Network_SRC_FILE SRC_FILE-NOTFOUND)
+
+        find_file(NF_Network_SRC_FILE ${SRC_FILE}
+            PATHS
+
+                ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl
+                
+                # ${NX_THREAD_LOCATION}
+                ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_common
+                # ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/_common/NetX
+
+                # ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/CubeMX
+                # ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo
+
+                # # drivers
+                # ${NETWORK_DRIVER_LOCATION}
+                # ${NETWORK_DRIVER_LOCATION}/..
+
+                ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}
+    
+            CMAKE_FIND_ROOT_PATH_BOTH
+        )
+
+        if (BUILD_VERBOSE)
+            message("${SRC_FILE} >> ${NF_Network_SRC_FILE}")
+        endif()
+
+        list(APPEND NF_Network_SOURCES ${NF_Network_SRC_FILE})
+
+    endforeach()
+
 #########################
 # network layer from lwIP
 else()

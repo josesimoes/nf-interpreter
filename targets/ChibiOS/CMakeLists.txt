@@ -209,8 +209,8 @@ if(NF_FEATURE_HAS_SDCARD OR NF_FEATURE_HAS_USB_MSD)
 
 endif()
 
-# if networking is enabled add lwIP to the build
-if(USE_NETWORKING_OPTION)
+# if networking is enabled and target is not MXCHIP, add lwIP to the build
+if(USE_NETWORKING_OPTION AND NOT ${TARGET_BOARD} STREQUAL "MXCHIP_AZ3166")
 
     nf_add_lwip_library()
 

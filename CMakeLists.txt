@@ -543,8 +543,8 @@ if(API_System.Net)
     # set NETWORKING option to true
     set(USE_NETWORKING_OPTION TRUE CACHE INTERNAL "NF feature NETWORKING")
 
-    # set Security module to use (not applicable for Azure RTOS)
-    if(NOT RTOS_AZURERTOS_CHECK AND NF_SECURITY_MBEDTLS)
+    # set Security module to use (not applicable for Azure RTOS AND ChibiOS with MXCHIP_AZ3166)
+    if((NOT RTOS_AZURERTOS_CHECK AND NF_SECURITY_MBEDTLS) AND (RTOS_CHIBIOS_CHECK AND NOT TARGET_BOARD STREQUAL "MXCHIP_AZ3166"))
         set(USE_SECURITY_MBEDTLS_OPTION TRUE CACHE INTERNAL "NF security MBEDTLS")
     endif()
 
@@ -699,7 +699,12 @@ endif()
 if(USE_NETWORKING_OPTION)
 
     if(RTOS_CHIBIOS_CHECK)
-        set(HAL_USE_MAC_OPTION TRUE CACHE INTERNAL "HAL MAC for USE_NETWORKING_OPTION, ChibiOS only")
+        if(NOT(TARGET_BOARD STREQUAL "MXCHIP_AZ3166"))
+            # only for ChibiOS and NOT MXCHIP_AZ3166
+            set(HAL_USE_MAC_OPTION TRUE CACHE INTERNAL "HAL MAC for USE_NETWORKING_OPTION, ChibiOS only")
+        else()
+            set(HAL_USE_MAC_OPTION FALSE CACHE INTERNAL "No HAL MAC for MXCHIP_AZ3166")
+        endif()
     endif()
 
     if(NF_SECURITY_MBEDTLS)

@@ -5,7 +5,12 @@
 
 // This file includes the platform and board specific Network Intialisation
 
+
 #include <nanoHAL.h>
+
+#if defined(TARGET_MXCHIP_AZ3166)
+
+#else
 #include <nf_lwipthread.h>
 
 // this is the declaration for the callback implement in nf_sys_arch.c
@@ -91,3 +96,5 @@ void nanoHAL_Network_Uninitialize()
 {
     // Empty
 }
+
+#endif // TARGET_MXCHIP_AZ3166

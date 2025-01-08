@@ -5,6 +5,14 @@
 //
 
 #include <nanoHAL.h>
+
+// code for MXCHIP_AZ3166
+#if defined(TARGET_MXCHIP_AZ3166)
+
+
+#else
+
+// other targets
 #include <lwip/netifapi.h>
 
 extern "C" struct netif *nf_getNetif();
@@ -64,3 +72,5 @@ bool Network_Interface_Close(int index)
     }
     return false;
 }
+
+#endif // TARGET_MXCHIP_AZ3166
