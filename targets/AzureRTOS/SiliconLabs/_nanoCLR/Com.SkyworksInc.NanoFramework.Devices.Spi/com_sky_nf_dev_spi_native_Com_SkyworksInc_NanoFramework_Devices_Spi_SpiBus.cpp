@@ -256,14 +256,14 @@ HRESULT Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_
             // Return current timeout value
             NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeout));
 
-            // protect the buffers from GC so DMA can find them where they are supposed to be
+            // pind the buffers so DMA can find them where they are supposed to be
             if (writeData != NULL)
             {
-                CLR_RT_ProtectFromGC gcWriteBuffer(*writeBuffer);
+                writeBuffer->Pin();
             }
             if (readData != NULL)
             {
-                CLR_RT_ProtectFromGC gcReadBuffer(*readBuffer);
+                readBuffer->Pin();
             }
 
             // Set callback for async calls to nano spi
@@ -320,7 +320,23 @@ HRESULT Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_
         pThis = NULL;
     }
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_CLEANUP();
+
+    if (hr != CLR_E_THREAD_WAITING)
+    {
+        // need to clean up the buffer, if this was not rescheduled
+        if (writeData != NULL && writeBuffer->IsPinned())
+        {
+            writeBuffer->Unpin();
+        }
+
+        if (readData != NULL && readBuffer->IsPinned())
+        {
+            readBuffer->Unpin();
+        }
+    }
+
+    NANOCLR_CLEANUP_END();
 }
 
 static HRESULT SPI_nWrite_nRead(
