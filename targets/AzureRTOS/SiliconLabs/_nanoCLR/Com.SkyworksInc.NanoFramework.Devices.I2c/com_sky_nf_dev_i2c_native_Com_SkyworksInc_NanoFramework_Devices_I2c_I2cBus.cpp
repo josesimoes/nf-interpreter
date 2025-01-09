@@ -421,6 +421,9 @@ static HRESULT NativeTransmit(uint8_t busIndex, NF_PAL_I2C *&palI2c, CLR_RT_Stac
 
             // use the span length as write size, only the elements defined by the span must be written
             palI2c->WriteSize = writeSpanByte[SpanByte::FIELD___length].NumericByRef().s4;
+
+            // pin the buyffer
+            writeBuffer->Pin();
         }
     }
 
@@ -444,6 +447,9 @@ static HRESULT NativeTransmit(uint8_t busIndex, NF_PAL_I2C *&palI2c, CLR_RT_Stac
 
             // use the span length as read size, only the elements defined by the span must be read
             palI2c->ReadSize = readSpanByte[SpanByte::FIELD___length].NumericByRef().s4;
+
+            // pin the buffer
+            readBuffer->Pin();
         }
     }
 
@@ -467,10 +473,6 @@ static HRESULT NativeTransmit(uint8_t busIndex, NF_PAL_I2C *&palI2c, CLR_RT_Stac
         hbTimeout.SetInteger((CLR_INT64)estimatedDurationMiliseconds * TIME_CONVERSION__TO_MILLISECONDS);
 
         NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeout));
-
-        // pin the buffers so DMA can find them where they are supposed to be
-        writeBuffer->Pin();
-        readBuffer->Pin();
     }
 
     // this is going to be used to check for the right event in case of simultaneous I2C transaction
@@ -640,7 +642,7 @@ static HRESULT NativeTransmit(uint8_t busIndex, NF_PAL_I2C *&palI2c, CLR_RT_Stac
 
     NANOCLR_CLEANUP();
 
-    if (isLongRunningOperation && hr != CLR_E_THREAD_WAITING)
+    if (hr != CLR_E_THREAD_WAITING)
     {
         // need to clean up the buffer, if this was not rescheduled
         if (writeBuffer != NULL && writeBuffer->IsPinned())

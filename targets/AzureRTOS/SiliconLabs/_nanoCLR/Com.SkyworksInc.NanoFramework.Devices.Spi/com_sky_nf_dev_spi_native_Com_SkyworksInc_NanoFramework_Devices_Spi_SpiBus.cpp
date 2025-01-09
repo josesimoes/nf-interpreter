@@ -194,6 +194,9 @@ HRESULT Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_
                 // use the span length as write size, only the elements defined by the span must be written
                 writeSize = writeSpanByte[SpanByte::FIELD___length].NumericByRef().s4;
                 writeData = (unsigned char *)writeBuffer->GetElement(writeOffset);
+
+                // pin the buffer
+                writeBuffer->Pin();
             }
         }
 
@@ -218,6 +221,9 @@ HRESULT Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_
                 // use the span length as read size, only the elements defined by the span must be read
                 readSize = readSpanByte[SpanByte::FIELD___length].NumericByRef().s4;
                 readData = (unsigned char *)readBuffer->GetElement(readOffset);
+
+                // pin the buffer
+                readBuffer->Pin();
             }
         }
 
@@ -255,16 +261,6 @@ HRESULT Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_
             // if m_customState == 0 then push timeout on to eval stack[0] then move to m_customState = 1
             // Return current timeout value
             NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeout));
-
-            // pind the buffers so DMA can find them where they are supposed to be
-            if (writeData != NULL)
-            {
-                writeBuffer->Pin();
-            }
-            if (readData != NULL)
-            {
-                readBuffer->Pin();
-            }
 
             // Set callback for async calls to nano spi
             rws.callback = Com_Sky_Spi_Callback;
@@ -325,12 +321,12 @@ HRESULT Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_
     if (hr != CLR_E_THREAD_WAITING)
     {
         // need to clean up the buffer, if this was not rescheduled
-        if (writeData != NULL && writeBuffer->IsPinned())
+        if (writeBuffer != NULL && writeBuffer->IsPinned())
         {
             writeBuffer->Unpin();
         }
 
-        if (readData != NULL && readBuffer->IsPinned())
+        if (writeBuffer != NULL && readBuffer->IsPinned())
         {
             readBuffer->Unpin();
         }
