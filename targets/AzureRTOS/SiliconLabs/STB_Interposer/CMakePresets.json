@@ -57,7 +57,7 @@
         {
             "name": "STB_Interposer_RTM",
             "inherits": [
-                "STB_Interposer_Debug"
+                "STB_Interposer"
             ],
             "hidden": false,
             "cacheVariables": {

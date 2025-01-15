@@ -56,7 +56,7 @@
           }
         },
         {
-            "name": "SKY_EEVB_Watchdog_Debug",
+            "name": "SKY_EEVB_Watchdog",
             "inherits": [
                 "SKY_EEVB"
             ],
@@ -69,7 +69,7 @@
         {
             "name": "SKY_EEVB_RTM",
             "inherits": [
-                "SKY_EEVB_Debug"
+                "SKY_EEVB"
             ],
             "hidden": false,
             "cacheVariables": {
