@@ -7,7 +7,7 @@
     ],
     "configurePresets": [
         {
-            "name": "SKY_CEVB1_Debug",
+            "name": "SKY_CEVB1",
             "inherits": [
                 "arm-gcc-cortex-preset",
                 "user-tools-repos",
@@ -16,7 +16,7 @@
             "hidden": false,
             "cacheVariables": {
                 "TARGET_BOARD": "SKY_CEVB1",
-                "TARGET_NAME": "SKY_CEVB1_Debug",
+                "TARGET_NAME": "SKY_CEVB1",
                 "RTOS": "AzureRTOS",
                 "TARGET_SERIES": "EFM32GG11",
                 "SUPPORT_ANY_BASE_CONVERSION": "OFF",
@@ -55,13 +55,13 @@
             }
         },
         {
-            "name": "SKY_CEVB1_Release",
+            "name": "SKY_CEVB1_RTM",
             "inherits": [
-                "SKY_CEVB1_Debug"
+                "SKY_CEVB1"
             ],
             "hidden": false,
             "cacheVariables": {
-                "TARGET_NAME": "SKY_CEVB1_Release",
+                "TARGET_NAME": "SKY_CEVB1_RTM",
                 "NF_BUILD_RTM": "ON",
                 "NF_PROFILE_NEW_ALLOCATIONS": "OFF",
                 "NF_TRACE_MEMORY_STATS": "OFF"
@@ -71,15 +71,15 @@
     "buildPresets": [
         {
             "inherits": "base-user",
-            "name": "SKY_CEVB1_Debug",
-            "displayName": "SKY_CEVB1_Debug",
-            "configurePreset": "SKY_CEVB1_Debug"
+            "name": "SKY_CEVB1",
+            "displayName": "SKY_CEVB1",
+            "configurePreset": "SKY_CEVB1"
         },
         {
             "inherits": "base-user",
-            "name": "SKY_CEVB1_Release",
-            "displayName": "SKY_CEVB1_Release",
-            "configurePreset": "SKY_CEVB1_Release"
+            "name": "SKY_CEVB1_RTM",
+            "displayName": "SKY_CEVB1_RTM",
+            "configurePreset": "SKY_CEVB1_RTM"
         }
     ]
 }

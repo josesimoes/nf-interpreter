@@ -7,7 +7,7 @@
     ],
     "configurePresets": [
         {
-            "name": "FIELD_PROG_Debug",
+            "name": "FIELD_PROG",
             "inherits": [
                 "arm-gcc-cortex-preset",
                 "user-tools-repos",
@@ -16,7 +16,7 @@
             "hidden": false,
             "cacheVariables": {
                 "TARGET_BOARD": "FIELD_PROG",
-                "TARGET_NAME": "FIELD_PROG_Debug",
+                "TARGET_NAME": "FIELD_PROG",
                 "RTOS": "AzureRTOS",
                 "TARGET_SERIES": "EFM32GG11",
                 "SUPPORT_ANY_BASE_CONVERSION": "OFF",
@@ -55,13 +55,13 @@
             }
         },
         {
-            "name": "FIELD_PROG_Release",
+            "name": "FIELD_PROG_RTM",
             "inherits": [
-                "FIELD_PROG_Debug"
+                "FIELD_PROG"
             ],
             "hidden": false,
             "cacheVariables": {
-                "TARGET_NAME": "FIELD_PROG_Release",
+                "TARGET_NAME": "FIELD_PROG_RTM",
                 "NF_BUILD_RTM": "ON",
                 "NF_PROFILE_NEW_ALLOCATIONS": "OFF",
                 "NF_TRACE_MEMORY_STATS": "OFF"
@@ -71,15 +71,15 @@
     "buildPresets": [
         {
             "inherits": "base-user",
-            "name": "FIELD_PROG_Debug",
-            "displayName": "FIELD_PROG_Debug",
-            "configurePreset": "FIELD_PROG_Debug"
+            "name": "FIELD_PROG",
+            "displayName": "FIELD_PROG",
+            "configurePreset": "FIELD_PROG"
         },
         {
             "inherits": "base-user",
-            "name": "FIELD_PROG_Release",
-            "displayName": "FIELD_PROG_Release",
-            "configurePreset": "FIELD_PROG_Release"
+            "name": "FIELD_PROG_RTM",
+            "displayName": "FIELD_PROG_RTM",
+            "configurePreset": "FIELD_PROG_RTM"
         }
     ]
 }
