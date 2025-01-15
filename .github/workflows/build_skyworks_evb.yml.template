@@ -9,3 +9,4 @@ jobs:
     uses: ./.github/workflows/skyworks_evb_build.yaml
     with:
       targetName: '@PRESET@'
+      buildType: 'MinSizeRel'
