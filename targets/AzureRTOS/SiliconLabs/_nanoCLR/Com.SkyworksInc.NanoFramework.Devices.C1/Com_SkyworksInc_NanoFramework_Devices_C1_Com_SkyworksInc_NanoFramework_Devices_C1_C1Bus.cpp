@@ -411,9 +411,8 @@ void setupGPIO()
     // Enable clock for GPIO
     CMU_ClockEnable(cmuClock_GPIO, true);
 
-    // Configure pin as push-pull output, the third argument makes it so when the gpio is CLEAR it
-    // goes LOW and when SET it releases the pin the pull-up will drive it HIGH
-    GPIO_PinModeSet(C1_GPIO_PORT, C1_GPIO_PIN, gpioModeWiredAndPullUp, 1);
+    // Configure pin as push-pull output
+    GPIO_PinModeSet(C1_GPIO_PORT, C1_GPIO_PIN, gpioModePushPull, 1);
 
     // Set the GPIO to HIGH
     GPIO_PinOutSet(C1_GPIO_PORT, C1_GPIO_PIN);
