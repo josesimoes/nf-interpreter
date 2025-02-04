@@ -88,6 +88,9 @@ volatile int readCount = 0;
 
 volatile bool pinValue = false;
 
+// tells if the next write state shoud set the pin to 0 or 1
+volatile int next_write_gpio_state;
+
 CMU_Select_TypeDef lastClockSelect;
 
 volatile int bitToRead = 0;
@@ -96,6 +99,16 @@ volatile int tRest = 0;
 
 volatile int instruction0 = 0;
 volatile int instruction1 = 0;
+
+volatile int write_bit;
+
+// variables to calculate a delay in microseconds
+uint32_t core_clock_speed = 0;
+uint32_t delay_iterations = 0;
+
+TIMER_Prescale_TypeDef prescaler_slow = timerPrescale16;
+TIMER_Prescale_TypeDef prescaler_fast = timerPrescale8;
+
 
 void C1Bus::NativeTransmitWriteWithAddress( uint8_t param0, uint8_t param1, CLR_RT_TypedArray_UINT8 param2, HRESULT &hr )
 {
@@ -124,6 +137,7 @@ void C1Bus::NativeTransmitWriteWithAddress( uint8_t param0, uint8_t param1, CLR_
      *  First address write
      */
     // Reset state machine for the next run currentState = STATE_INIT;
+    next_write_gpio_state = 1;
     instruction = ADDRESS_WRITE;
     currentState = STATE_INIT;
     previousState = STATE_INIT;
@@ -144,6 +158,7 @@ void C1Bus::NativeTransmitWriteWithAddress( uint8_t param0, uint8_t param1, CLR_
      *  Second data read
      */
     // Reset state machine for the next run currentState = STATE_INIT;
+    next_write_gpio_state = 1;
     instruction = DATA_WRITE;
     currentState = STATE_INIT;
     previousState = STATE_INIT;
@@ -156,6 +171,10 @@ void C1Bus::NativeTransmitWriteWithAddress( uint8_t param0, uint8_t param1, CLR_
     while(currentState != STATE_END){}
 
     param2[0] = 0x01;
+
+    for (volatile uint32_t i = 0; i < 64; i++) {
+        // Empty loop to create delay
+    }
 
     cleanUp();
 
@@ -188,6 +207,7 @@ void C1Bus::NativeTransmitReadWithAddress( uint8_t param0, CLR_RT_TypedArray_UIN
      *  First address write
      */
     // Reset state machine for the next run currentState = STATE_INIT;
+    next_write_gpio_state = 1;
     instruction = ADDRESS_WRITE;
     currentState = STATE_INIT;
     previousState = STATE_INIT;
@@ -208,6 +228,7 @@ void C1Bus::NativeTransmitReadWithAddress( uint8_t param0, CLR_RT_TypedArray_UIN
      *  Second data read
      */
     // Reset state machine for the next run currentState = STATE_INIT;
+    next_write_gpio_state = 1;
     instruction = DATA_READ;
     currentState = STATE_INIT;
     previousState = STATE_INIT;
@@ -220,6 +241,10 @@ void C1Bus::NativeTransmitReadWithAddress( uint8_t param0, CLR_RT_TypedArray_UIN
 
     param1[0] = 0x01;
     param1[1] = transfer_data;
+
+    for (volatile uint32_t i = 0; i < 64; i++) {
+        // Empty loop to create delay
+    }
 
     cleanUp();
 
@@ -238,14 +263,15 @@ void C1Bus::NativeTransmitRead( CLR_RT_TypedArray_UINT8 param0, HRESULT &hr )
     // implementation starts here //
 
     init();
-    setupGPIO();
+    // setupGPIO();
 
     transfer_data = 0;
     bitToRead = 0;
 
-    setupTimer();
+    // setupTimer();
 
-        // Reset state machine for the next run currentState = STATE_INIT;
+    // Reset state machine for the next run currentState = STATE_INIT;
+    next_write_gpio_state = 1;
     instruction = DATA_READ;
     currentState = STATE_INIT;
     previousState = STATE_INIT;
@@ -258,6 +284,10 @@ void C1Bus::NativeTransmitRead( CLR_RT_TypedArray_UINT8 param0, HRESULT &hr )
 
     param0[0] = 0x01;
     param0[1] = transfer_data;
+
+    for (volatile uint32_t i = 0; i < 64; i++) {
+        // Empty loop to create delay
+    }
 
     cleanUp();
     
@@ -279,14 +309,15 @@ void C1Bus::NativeTransmitWrite( uint8_t param0, CLR_RT_TypedArray_UINT8 param1,
     // implementation starts here //
 
     init();
-    setupGPIO();
+    // setupGPIO();
 
     transfer_data = 0;
     bitToRead = 0;
 
-    setupTimer();
+    // setupTimer();
 
     // Reset state machine for the next run currentState = STATE_INIT;
+    next_write_gpio_state = 1;
     instruction = DATA_WRITE;
     currentState = STATE_INIT;
     previousState = STATE_INIT;
@@ -298,6 +329,10 @@ void C1Bus::NativeTransmitWrite( uint8_t param0, CLR_RT_TypedArray_UINT8 param1,
     while(currentState != STATE_END){}
 
     param1[0] = 0x01;
+
+    for (volatile uint32_t i = 0; i < 64; i++) {
+        // Empty loop to create delay
+    }
 
     cleanUp();
 
@@ -319,14 +354,15 @@ void C1Bus::NativeTransmitWriteAddress( uint8_t param0, CLR_RT_TypedArray_UINT8 
     // implementation starts here //
 
     init();
-    setupGPIO();
+    // setupGPIO();
 
     transfer_data = 0;
     bitToRead = 0;
 
-    setupTimer();
+    // setupTimer();
 
     // Reset state machine for the next run currentState = STATE_INIT;
+    next_write_gpio_state = 1;
     instruction = ADDRESS_WRITE;
     currentState = STATE_INIT;
     previousState = STATE_INIT;
@@ -338,6 +374,10 @@ void C1Bus::NativeTransmitWriteAddress( uint8_t param0, CLR_RT_TypedArray_UINT8 
     while(currentState != STATE_END){}
 
     param1[0] = 0x01;
+
+    for (volatile uint32_t i = 0; i < 64; i++) {
+        // Empty loop to create delay
+    }
 
     cleanUp();
     // implementation ends here   //
@@ -357,14 +397,15 @@ void C1Bus::NativeTransmitReadAddress( CLR_RT_TypedArray_UINT8 param0, HRESULT &
     // implementation starts here //
 
     init();
-    setupGPIO();
+    // setupGPIO();
 
     transfer_data = 0;
     bitToRead = 0;
 
-    setupTimer();
+    // setupTimer();
 
     // Reset state machine for the next run currentState = STATE_INIT;
+    next_write_gpio_state = 1;
     instruction = ADDRESS_READ;
     currentState = STATE_INIT;
     previousState = STATE_INIT;
@@ -378,6 +419,10 @@ void C1Bus::NativeTransmitReadAddress( CLR_RT_TypedArray_UINT8 param0, HRESULT &
     param0[0] = 0x01;
     param0[1] = transfer_data;
 
+    for (volatile uint32_t i = 0; i < 64; i++) {
+        // Empty loop to create delay
+    }
+
     cleanUp();
 
     // implementation ends here   //
@@ -388,22 +433,48 @@ void C1Bus::NativeTransmitReadAddress( CLR_RT_TypedArray_UINT8 param0, HRESULT &
 
 void init()
 {
+    for (volatile uint32_t i = 0; i < 64; i++) {
+        // Empty loop to create delay
+    }
+
+    // Disable interrupts globally
+    // CORE_ATOMIC_IRQ_DISABLE();
+
+    // Get the core clock frequency
+    core_clock_speed = CMU_ClockFreqGet(cmuClock_CORE);
+    delay_iterations = 1 * (core_clock_speed / 1000000) / 4;
+
     if(ignoreInit > 0) {
         return;
     }
 
-    instructions[DATA_WRITE] = C1Instruction(DATA_WRITE, 0, 0);
-    instructions[DATA_READ] = C1Instruction(DATA_READ, 0, 1);
-    instructions[ADDRESS_WRITE] = C1Instruction(ADDRESS_WRITE, 1, 0);
-    instructions[ADDRESS_READ] = C1Instruction(ADDRESS_READ, 1, 1);
-
     ignoreInit++;
+
+    setupGPIO();
+    setupTimer();
 }
 
-void initInstruction(C1InstructionName instructionType) {
-    // get instruction bit 0 and bit 1
-    instruction0 = instructions[instructionType].states[0];
-    instruction1 = instructions[instructionType].states[1];
+void initInstruction(C1InstructionName instructionType) 
+{
+    switch(instructionType)
+    {
+        case DATA_WRITE:
+            instruction0 = 0;
+            instruction1 = 0;
+            break;
+        case DATA_READ:
+            instruction0 = 0;
+            instruction1 = 1;
+            break;
+        case ADDRESS_WRITE:
+            instruction0 = 1;
+            instruction1 = 0;
+            break;
+        case ADDRESS_READ:
+            instruction0 = 1;
+            instruction1 = 1;
+            break;
+    }
 }
 
 void setupGPIO()
@@ -420,7 +491,12 @@ void setupGPIO()
 
 void cleanUp(void)
 {
-    // CMU_ClockSelectSet(lastClockSelect, cmuSelect_HFXO);
+    // Re-enable interrupts globally
+    // CORE_ATOMIC_IRQ_ENABLE();
+
+    for (volatile uint32_t i = 0; i < 64; i++) {
+        // Empty loop to create delay
+    }
 }
 
 void setupTimer()
@@ -447,6 +523,7 @@ void setupTimer()
 
     // Enable TIMER0 interrupts
     TIMER_IntEnable(TIMER0, TIMER_IF_OF);  // Enable overflow interrupt
+    NVIC_SetPriority(TIMER0_IRQn, 0);      // Set TIMER0 interrupt priority to highest
     NVIC_EnableIRQ(TIMER0_IRQn);
 }
 
@@ -454,6 +531,10 @@ void TIMER0_IRQHandler()
 {
     // Clear TIMER0 interrupt flag
     TIMER_IntClear(TIMER0, TIMER_IF_OF);
+
+    // Disable interrupts
+    // CORE_ATOMIC_IRQ_DISABLE();
+    // __disable_irq();
 
     switch (currentState)
     {
@@ -478,10 +559,27 @@ void TIMER0_IRQHandler()
             currentState = INSTRUCTION_1;
             break;
         case INSTRUCTION_1:
-            handleInstructionWrite(instruction0, 0, INSTRUCTION_2);
+            GPIO_SIGNAL(0);
+
+            if(instruction0 == 1 && writeLogical1 < 3) {
+                writeLogical1++;
+            }
+            else {
+                currentState = INSTRUCTION_2;
+                writeLogical1 = 0;
+            }
+
             break;
         case INSTRUCTION_2:
-            handleInstructionWrite(instruction1, 1, INCREMENT);
+            GPIO_SIGNAL(1);
+
+            if(instruction1 == 1 && writeLogical1 < 3) {
+                writeLogical1++;
+            }
+            else {
+                currentState = INCREMENT;
+                writeLogical1 = 0;
+            }
             break;
         case INCREMENT:
             GPIO_SIGNAL(0);
@@ -503,17 +601,17 @@ void TIMER0_IRQHandler()
             currentState = READ_2;
             break;
         case READ_2:
-            currentState = READ_3;
+            currentState = READ_3;            
             break;
         case READ_3:
             // delay 4 cycles in order to allow the DUT to pull LOW or 
             // release the signal and the pull up to set it HIGH
             for (volatile uint32_t i = 0; i < 4; i++) {
-               // Empty loop to create delay
+               __asm volatile ("nop"); // No-operation instruction
             }
 
             pinValue = GPIO_READ();
-            
+        
             // keep the signal LOW or HIGH depending on what the DUT signal was
             if(pinValue){
                 GPIO_SIGNAL(1);
@@ -521,7 +619,11 @@ void TIMER0_IRQHandler()
             else {
                 GPIO_SIGNAL(0);
             }
-
+            
+            currentState = READ_4;
+            
+            break;
+        case READ_4:
             // modify the current bit of transfer_data which holds the register
             // value
             if(pinValue) {
@@ -532,21 +634,21 @@ void TIMER0_IRQHandler()
             }
 
             bitToRead++;
-            currentState = READ_4;
-            break;
-        case READ_4:
             currentState = READ_5;
             break;
         case READ_5:
             // if value is 1 we need to pull the line low for an extra cycle in READ_6
             if(pinValue) {
+                //GPIO_SIGNAL(1);
                 currentState = READ_6;
             }
             else {
+                // GPIO_SIGNAL(0);
                 if(tRest < 1) {
                     tRest++;
                 }
                 else {
+                    tRest = 0;
                     // byte value is 0 and there's still values to read go back to
                     // READ_1, if not go to STATE_END
                     if(bitToRead < 8) {
@@ -579,28 +681,109 @@ void TIMER0_IRQHandler()
             }
             break;
         case DATA_1:
-            handleDataWrite(0, &transfer_data, DATA_2);
+            GPIO_SIGNAL(1);
+
+            write_bit = (transfer_data & (1 << 0)) >> 0;
+        
+            if(write_bit == 1 && writeLogical1 < 3) {
+                writeLogical1++;
+            }
+            else {
+                writeLogical1 = 0;
+                currentState = DATA_2;
+            }
+
             break;
         case DATA_2:
-            handleDataWrite(1, &transfer_data, DATA_3);
+            GPIO_SIGNAL(0);
+
+            write_bit = (transfer_data & (1 << 1)) >> 1;
+        
+            if(write_bit == 1 && writeLogical1 < 3) {
+                writeLogical1++;
+            }
+            else {
+                writeLogical1 = 0;
+                currentState = DATA_3;
+            }
             break;
         case DATA_3:
-            handleDataWrite(2, &transfer_data, DATA_4);
+            GPIO_SIGNAL(1);
+
+            write_bit = (transfer_data & (1 << 2)) >> 2;
+        
+            if(write_bit == 1 && writeLogical1 < 3) {
+                writeLogical1++;
+            }
+            else {
+                writeLogical1 = 0;
+                currentState = DATA_4;
+            }
             break;
         case DATA_4:
-            handleDataWrite(3, &transfer_data, DATA_5);
+            GPIO_SIGNAL(0);
+
+            write_bit = (transfer_data & (1 << 3)) >> 3;
+        
+            if(write_bit == 1 && writeLogical1 < 3) {
+                writeLogical1++;
+            }
+            else {
+                writeLogical1 = 0;
+                currentState = DATA_5;
+            }
             break;
         case DATA_5:
-            handleDataWrite(4, &transfer_data, DATA_6);
+            GPIO_SIGNAL(1);
+
+            write_bit = (transfer_data & (1 << 4)) >> 4;
+        
+            if(write_bit == 1 && writeLogical1 < 3) {
+                writeLogical1++;
+            }
+            else {
+                writeLogical1 = 0;
+                currentState = DATA_6;
+            }
             break;
         case DATA_6:
-            handleDataWrite(5, &transfer_data, DATA_7);
+            GPIO_SIGNAL(0);
+
+            write_bit = (transfer_data & (1 << 5)) >> 5;
+        
+            if(write_bit == 1 && writeLogical1 < 3) {
+                writeLogical1++;
+            }
+            else {
+                writeLogical1 = 0;
+                currentState = DATA_7;
+            }
             break;
         case DATA_7:
-            handleDataWrite(6, &transfer_data, DATA_8);
+            GPIO_SIGNAL(1);
+
+            write_bit = (transfer_data & (1 << 6)) >> 6;
+        
+            if(write_bit == 1 && writeLogical1 < 3) {
+                writeLogical1++;
+            }
+            else {
+                writeLogical1 = 0;
+                currentState = DATA_8;
+            }
             break;
         case DATA_8:
-            handleDataWrite(7, &transfer_data, STATE_END);
+            GPIO_SIGNAL(0);
+
+            write_bit = (transfer_data & (1 << 7)) >> 7;
+        
+            if(write_bit == 1 && writeLogical1 < 3) {
+                writeLogical1++;
+            }
+            else {
+                writeLogical1 = 0;
+                currentState = STATE_END;
+            }
             break;
         case STATE_END:
             GPIO_SIGNAL(1);
@@ -613,7 +796,8 @@ void TIMER0_IRQHandler()
             break;  
     }
 
-    
+    // Re-enable interrupts
+    // __enable_irq();
 }
 
 void handleInstructionWrite(int instr_value, int index, C1_States nextState)
@@ -631,14 +815,9 @@ void handleInstructionWrite(int instr_value, int index, C1_States nextState)
 
 void handleDataWrite(int index, uint8_t* data, C1_States nextState)
 {
-    int write_bit = getNthBit(*data, index);
+    GPIO_SIGNAL(next_write_gpio_state);
 
-    if((index % 2) == 0) {
-        GPIO_SIGNAL(1);
-    }
-    else {
-        GPIO_SIGNAL(0);
-    }
+    int write_bit = (*data & (1 << index)) >> index;;
  
     if(write_bit == 1 && writeLogical1 < 3) {
         writeLogical1++;
@@ -646,31 +825,31 @@ void handleDataWrite(int index, uint8_t* data, C1_States nextState)
     else {
         writeLogical1 = 0;
         currentState = nextState;
+
+        int next_index = index + 1;
+
+        // once it goes to the next state we need to change it
+        if(( next_index % 2) == 0) {
+            next_write_gpio_state = 1;
+        }
+        else {
+            next_write_gpio_state = 0;
+        }
     }
 }
 
 int getNthBit(uint8_t data, int n)
 {
-    if(n < 8) {
-        if((data & (1 << n)) == 0) {
-            return 0;
-        } else {
-            return 1;
-        }
-    }
-
-    return -1;
+    return (data & (1 << n)) >> n;
 }
 
 void setNthBit(uint8_t &data, int n, bool logicValue)
 {
-    if(n < 8) {
-        if(logicValue) {
-            data |= (1 << n);
-        }
-        else {
-            data &= ~(1 << n);
-        }
+    if(logicValue) {
+        data |= (1 << n);
+    }
+    else {
+        data &= ~(1 << n);
     }
 }
 

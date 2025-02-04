@@ -1,6 +1,7 @@
 #ifndef COM_SKYWORKSINC_NANOFRAMEWORK_DEVICES_C1_NATIVE_TARGET_H
 #define COM_SKYWORKSINC_NANOFRAMEWORK_DEVICES_C1_NATIVE_TARGET_H
 #include <em_device.h>
+#include "em_timer.h"
 #include "target_com_sky_nf_dev_c1_config.h"
 
 #ifndef GECKO_USE_C1
@@ -15,6 +16,16 @@
 
     // GPIO_SIGNAL(0) = LOW, GPIO_SIGNAL(1) = HIGH
     #define GPIO_SIGNAL(value)  (value ? (GPIO->P[C1_GPIO_PORT].DOUT |= REGISTER_BIT) : (GPIO->P[C1_GPIO_PORT].DOUT &= ~REGISTER_BIT))
+
+    // Set the prescaler of timer 0 in order to increase or decrease the frequency
+    #define TIMER0_SET_PRESCALER(prescaler) {   \
+        TIMER0->CTRL = (TIMER0->CTRL & ~_TIMER_CTRL_PRESC_MASK) | prescaler;   \
+        TIMER0->CNT = 0;    \
+        TIMER0->CMD = TIMER_CMD_START;  \
+        TIMER0->IFC = TIMER_IFC_OF;     \
+        TIMER0->IEN = TIMER_IEN_OF;     \
+        NVIC->ISER[(((uint32_t)TIMER0_IRQn) >> 5)] = (1 << (((uint32_t)TIMER0_IRQn) & 0x1F));    \
+    }
 #else
 #error                                                                                                                 \
     "Only _SILICON_LABS_32B_SERIES_1 is supported at this time. To add support for other series declaration above has to be updated"
