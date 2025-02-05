@@ -15,7 +15,20 @@
     #define GPIO_READ()         ((GPIO->P[C1_GPIO_PORT].DIN & REGISTER_BIT) ? 1 : 0)
 
     // GPIO_SIGNAL(0) = LOW, GPIO_SIGNAL(1) = HIGH
-    #define GPIO_SIGNAL(value)  (value ? (GPIO->P[C1_GPIO_PORT].DOUT |= REGISTER_BIT) : (GPIO->P[C1_GPIO_PORT].DOUT &= ~REGISTER_BIT))
+    //#define GPIO_SIGNAL(value)  (value ? (GPIO->P[C1_GPIO_PORT].DOUT |= REGISTER_BIT) : (GPIO->P[C1_GPIO_PORT].DOUT &= ~REGISTER_BIT))
+    
+    #define GPIO_SIGNAL(state) \
+    do { \
+        if ((state) == 0) { \
+            GPIO->P[1].DOUT &= ~(1 << 9); \
+            GPIO->P[1].MODEL = (GPIO->P[1].MODEL & ~(_GPIO_P_MODEL_MODE0_MASK << (9 % 8 * 4))) | (GPIO_P_MODEL_MODE0_PUSHPULL << (9 % 8 * 4)); \
+        } else if ((state) == 1) { \
+            GPIO->P[1].DOUT |= (1 << 9); \
+            GPIO->P[1].MODEL = (GPIO->P[1].MODEL & ~(_GPIO_P_MODEL_MODE0_MASK << (9 % 8 * 4))) | (GPIO_P_MODEL_MODE0_PUSHPULL << (9 % 8 * 4)); \
+        } else if ((state) == 2) { \
+            GPIO->P[1].MODEL = (GPIO->P[1].MODEL & ~(_GPIO_P_MODEL_MODE0_MASK << (9 % 8 * 4))) | (GPIO_P_MODEL_MODE0_INPUT << (9 % 8 * 4)); \
+        } \
+    } while (0)
 
     // Set the prescaler of timer 0 in order to increase or decrease the frequency
     #define TIMER0_SET_PRESCALER(prescaler) {   \
