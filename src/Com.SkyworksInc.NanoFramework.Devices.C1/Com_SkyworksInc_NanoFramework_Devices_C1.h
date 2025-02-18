@@ -13,6 +13,11 @@
 #include <nanoCLR_Runtime.h>
 #include <nanoPackStruct.h>
 
+typedef enum __nfpack C1TransferStatus
+{
+    C1TransferStatus_UnknownError = 0,
+} C1TransferStatus;
+
 struct Library_Com_SkyworksInc_NanoFramework_Devices_C1_Com_SkyworksInc_NanoFramework_Devices_C1_C1Bus
 {
     static const int FIELD___syncLock = 1;
@@ -23,6 +28,13 @@ struct Library_Com_SkyworksInc_NanoFramework_Devices_C1_Com_SkyworksInc_NanoFram
     NANOCLR_NATIVE_DECLARE(NativeTransmitWrite___VOID__U1__SZARRAY_U1);
     NANOCLR_NATIVE_DECLARE(NativeTransmitWriteAddress___VOID__U1__SZARRAY_U1);
     NANOCLR_NATIVE_DECLARE(NativeTransmitReadAddress___VOID__SZARRAY_U1);
+
+    //--//
+};
+
+struct Library_Com_SkyworksInc_NanoFramework_Devices_C1_Com_SkyworksInc_NanoFramework_Devices_C1_C1Exception
+{
+    static const int FIELD___status = 5;
 
     //--//
 };

@@ -24,6 +24,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_Com_SkyworksInc_NanoFramework_Devices_C1_Com_SkyworksInc_NanoFramework_Devices_C1_C1Bus::NativeTransmitWriteAddress___VOID__U1__SZARRAY_U1,
     Library_Com_SkyworksInc_NanoFramework_Devices_C1_Com_SkyworksInc_NanoFramework_Devices_C1_C1Bus::NativeTransmitReadAddress___VOID__SZARRAY_U1,
     NULL,
+    NULL,
+    NULL,
+    NULL,
 };
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Com_SkyworksInc_NanoFramework_Devices_C1 =
