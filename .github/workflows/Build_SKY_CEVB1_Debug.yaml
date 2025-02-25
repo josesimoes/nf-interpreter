@@ -8,4 +8,5 @@ jobs:
     name: Build SKY_CEVB1_Debug
     uses: ./.github/workflows/skyworks_evb_build.yaml
     with:
-      targetName: 'SKY_CEVB1_Debug'
+      targetName: 'SKY_CEVB1'
+      buildType: 'Debug'

@@ -8,4 +8,5 @@ jobs:
     name: Build SKY_CEVB1_Release
     uses: ./.github/workflows/skyworks_evb_build.yaml
     with:
-      targetName: 'SKY_CEVB1_Release'
+      targetName: 'SKY_CEVB1'
+      buildType: 'MinSizeRel'

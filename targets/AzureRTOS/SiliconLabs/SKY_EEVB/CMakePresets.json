@@ -7,7 +7,7 @@
     ],
     "configurePresets": [
         {
-            "name": "SKY_EEVB_Debug",
+            "name": "SKY_EEVB",
             "inherits": [
                 "arm-gcc-cortex-preset",
                 "user-tools-repos",
@@ -16,7 +16,7 @@
             "hidden": false,
           "cacheVariables": {
             "TARGET_BOARD": "SKY_EEVB",
-            "TARGET_NAME": "SKY_EEVB_Debug",
+            "TARGET_NAME": "SKY_EEVB",
             "RTOS": "AzureRTOS",
             "TARGET_SERIES": "EFM32GG11",
             "SUPPORT_ANY_BASE_CONVERSION": "OFF",
@@ -57,24 +57,24 @@
           }
         },
         {
-            "name": "SKY_EEVB_Watchdog_Debug",
+            "name": "SKY_EEVB_Watchdog",
             "inherits": [
-                "SKY_EEVB_Debug"
+                "SKY_EEVB"
             ],
             "hidden": false,
             "cacheVariables": {
-                "TARGET_NAME": "SKY_EEVB_Watchdog_Debug",
+                "TARGET_NAME": "SKY_EEVB_Watchdog",
                 "NF_FEATURE_WATCHDOG": "ON"
             }
         },
         {
-            "name": "SKY_EEVB_Release",
+            "name": "SKY_EEVB_RTM",
             "inherits": [
-                "SKY_EEVB_Debug"
+                "SKY_EEVB"
             ],
             "hidden": false,
             "cacheVariables": {
-                "TARGET_NAME": "SKY_EEVB_Release",
+                "TARGET_NAME": "SKY_EEVB_RTM",
                 "NF_BUILD_RTM": "ON",
                 "NF_PROFILE_NEW_ALLOCATIONS": "OFF",
                 "NF_TRACE_MEMORY_STATS": "OFF"
@@ -84,21 +84,21 @@
     "buildPresets": [
         {
             "inherits": "base-user",
-            "name": "SKY_EEVB_Debug",
-            "displayName": "SKY_EEVB_Debug",
-            "configurePreset": "SKY_EEVB_Debug"
+            "name": "SKY_EEVB",
+            "displayName": "SKY_EEVB",
+            "configurePreset": "SKY_EEVB"
         },
         {
             "inherits": "base-user",
-            "name": "SKY_EEVB_Watchdog_Debug",
-            "displayName": "SKY_EEVB_Watchdog_Debug",
-            "configurePreset": "SKY_EEVB_Watchdog_Debug"
+            "name": "SKY_EEVB_Watchdog",
+            "displayName": "SKY_EEVB_Watchdog",
+            "configurePreset": "SKY_EEVB_Watchdog"
         },
         {
             "inherits": "base-user",
-            "name": "SKY_EEVB_Release",
-            "displayName": "SKY_EEVB_Release",
-            "configurePreset": "SKY_EEVB_Release"
+            "name": "SKY_EEVB_RTM",
+            "displayName": "SKY_EEVB_RTM",
+            "configurePreset": "SKY_EEVB_RTM"
         }
     ]
 }

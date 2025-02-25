@@ -1,0 +1,12 @@
+name: Build SKY_CEVB1_RTM
+
+on:
+  workflow_dispatch
+
+jobs:
+  build_SKY_CEVB1_RTM:
+    name: Build SKY_CEVB1_RTM
+    uses: ./.github/workflows/skyworks_evb_build.yaml
+    with:
+      targetName: 'SKY_CEVB1_RTM'
+      buildType: 'MinSizeRel'

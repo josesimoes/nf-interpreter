@@ -1,0 +1,12 @@
+name: Build SKY_EEVB_RTM
+
+on:
+  workflow_dispatch
+
+jobs:
+  build_SKY_EEVB_RTM:
+    name: Build SKY_EEVB_RTM
+    uses: ./.github/workflows/skyworks_evb_build.yaml
+    with:
+      targetName: 'SKY_EEVB_RTM'
+      buildType: 'MinSizeRel'

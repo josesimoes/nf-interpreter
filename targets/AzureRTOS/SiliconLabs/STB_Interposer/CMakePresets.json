@@ -7,7 +7,7 @@
     ],
     "configurePresets": [
         {
-            "name": "STB_Interposer_Debug",
+            "name": "STB_Interposer",
             "inherits": [
                 "arm-gcc-cortex-preset",
                 "user-tools-repos",
@@ -16,7 +16,7 @@
             "hidden": false,
             "cacheVariables": {
                 "TARGET_BOARD": "STB_Interposer",
-                "TARGET_NAME": "STB_Interposer_Debug",
+                "TARGET_NAME": "STB_Interposer",
                 "RTOS": "AzureRTOS",
                 "TARGET_SERIES": "EFM32GG11",
                 "SUPPORT_ANY_BASE_CONVERSION": "OFF",
@@ -55,9 +55,9 @@
             }
         },
         {
-            "name": "STB_Interposer_Release",
+            "name": "STB_Interposer_RTM",
             "inherits": [
-                "STB_Interposer_Debug"
+                "STB_Interposer"
             ],
             "hidden": false,
             "cacheVariables": {
@@ -71,15 +71,15 @@
     "buildPresets": [
         {
             "inherits": "base-user",
-            "name": "STB_Interposer_Debug",
-            "displayName": "STB_Interposer_Debug",
-            "configurePreset": "STB_Interposer_Debug"
+            "name": "STB_Interposer",
+            "displayName": "STB_Interposer",
+            "configurePreset": "STB_Interposer"
         },
         {
             "inherits": "base-user",
-            "name": "STB_Interposer_Release",
-            "displayName": "STB_Interposer_Release",
-            "configurePreset": "STB_Interposer_Release"
+            "name": "STB_Interposer_RTM",
+            "displayName": "STB_Interposer_RTM",
+            "configurePreset": "STB_Interposer_RTM"
         }
     ]
 }

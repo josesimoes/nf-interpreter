@@ -13,6 +13,7 @@ typedef Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_
 typedef Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_Spi_SpiBaseConfiguration
     SpiBaseConfiguration;
 typedef Library_corlib_native_System_SpanByte SpanByte;
+typedef Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_Spi_SpiException SpiException;
 
 static HRESULT SPI_nWrite_nRead(
     NF_PAL_SPI *palSpi,
@@ -119,7 +120,8 @@ bool System_Device_IsLongRunningOperation(
     }
 }
 
-HRESULT ExecuteTransfer(CLR_RT_StackFrame &stack)
+HRESULT Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_Spi_SpiBus::ExecuteTransfer(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -135,6 +137,7 @@ HRESULT ExecuteTransfer(CLR_RT_StackFrame &stack)
     int16_t readOffset = 0;
     int16_t writeOffset = 0;
     bool fullDuplex;
+    int32_t operationResult;
 
     bool isLongRunningOperation;
     uint32_t estimatedDurationMiliseconds;
@@ -191,6 +194,9 @@ HRESULT ExecuteTransfer(CLR_RT_StackFrame &stack)
                 // use the span length as write size, only the elements defined by the span must be written
                 writeSize = writeSpanByte[SpanByte::FIELD___length].NumericByRef().s4;
                 writeData = (unsigned char *)writeBuffer->GetElement(writeOffset);
+
+                // pin the buffer
+                writeBuffer->Pin();
             }
         }
 
@@ -215,6 +221,9 @@ HRESULT ExecuteTransfer(CLR_RT_StackFrame &stack)
                 // use the span length as read size, only the elements defined by the span must be read
                 readSize = readSpanByte[SpanByte::FIELD___length].NumericByRef().s4;
                 readData = (unsigned char *)readBuffer->GetElement(readOffset);
+
+                // pin the buffer
+                readBuffer->Pin();
             }
         }
 
@@ -253,16 +262,6 @@ HRESULT ExecuteTransfer(CLR_RT_StackFrame &stack)
             // Return current timeout value
             NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeout));
 
-            // protect the buffers from GC so DMA can find them where they are supposed to be
-            if (writeData != NULL)
-            {
-                CLR_RT_ProtectFromGC gcWriteBuffer(*writeBuffer);
-            }
-            if (readData != NULL)
-            {
-                CLR_RT_ProtectFromGC gcReadBuffer(*readBuffer);
-            }
-
             // Set callback for async calls to nano spi
             rws.callback = Com_Sky_Spi_Callback;
         }
@@ -270,7 +269,7 @@ HRESULT ExecuteTransfer(CLR_RT_StackFrame &stack)
         // Start SPI transfer
         // We can ask for async transfer by setting callback but it depends if underlying supports it
         // return of CLR_E_BUSY means async started
-        hr = SPI_nWrite_nRead(
+        operationResult = SPI_nWrite_nRead(
             palSpi,
             SpiConfigs[busIndex - 1],
             rws,
@@ -280,9 +279,14 @@ HRESULT ExecuteTransfer(CLR_RT_StackFrame &stack)
             (int32_t)readSize);
 
         // Async transfer started, go to custom 2 state (wait completion)
-        if (hr == CLR_E_BUSY)
+        if (operationResult == CLR_E_BUSY)
         {
             stack.m_customState = 2;
+        }
+        else if (operationResult != S_OK)
+        {
+            // Something went wrong with SPI transfer
+            NANOCLR_CHECK_HRESULT(ThrowError(stack, operationResult));
         }
     }
 
@@ -312,7 +316,23 @@ HRESULT ExecuteTransfer(CLR_RT_StackFrame &stack)
         pThis = NULL;
     }
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_CLEANUP();
+
+    if (hr != CLR_E_THREAD_WAITING)
+    {
+        // need to clean up the buffer, if this was not rescheduled
+        if (writeBuffer != NULL && writeBuffer->IsPinned())
+        {
+            writeBuffer->Unpin();
+        }
+
+        if (writeBuffer != NULL && readBuffer->IsPinned())
+        {
+            readBuffer->Unpin();
+        }
+    }
+
+    NANOCLR_CLEANUP_END();
 }
 
 static HRESULT SPI_nWrite_nRead(
@@ -327,6 +347,7 @@ static HRESULT SPI_nWrite_nRead(
     NANOCLR_HEADER();
 
     bool busConfigIsHalfDuplex;
+    Ecode_t transferResult;
 
     // If callback then use async operation
     bool sync = (wrc.callback == 0);
@@ -382,7 +403,7 @@ static HRESULT SPI_nWrite_nRead(
             {
                 // Full duplex
                 // Uses the largest buffer size as transfer size
-                NF_SpiDriver_TransferBlocking(
+                transferResult = NF_SpiDriver_MTransferB(
                     palSpi->Handle,
                     palSpi->WriteBuffer,
                     palSpi->ReadBuffer,
@@ -397,7 +418,13 @@ static HRESULT SPI_nWrite_nRead(
                 //     // half duplex operation, set output enable
                 //     palSpi->Handle->spi->CR1 |= SPI_CR1_BIDIOE;
                 // }
-                NF_SpiDriver_TransmitBlocking(palSpi->Handle, palSpi->WriteBuffer, palSpi->WriteSize);
+                transferResult = NF_SpiDriver_MTransmitB(palSpi->Handle, palSpi->WriteBuffer, palSpi->WriteSize);
+
+                // bail out if the transmit operation failed
+                if (transferResult != ECODE_EMDRV_SPIDRV_OK)
+                {
+                    NANOCLR_SET_AND_LEAVE(transferResult);
+                }
 
                 // receive operation
                 // TODO
@@ -406,7 +433,7 @@ static HRESULT SPI_nWrite_nRead(
                 //     // half duplex operation, set output enable
                 //     palSpi->Handle->spi->CR1 &= ~SPI_CR1_BIDIOE;
                 // }
-                NF_SpiDriver_ReceiveBlocking(palSpi->Handle, palSpi->ReadBuffer, palSpi->ReadSize);
+                transferResult = NF_SpiDriver_MReceiveB(palSpi->Handle, palSpi->ReadBuffer, palSpi->ReadSize);
             }
         }
         else
@@ -421,7 +448,7 @@ static HRESULT SPI_nWrite_nRead(
                 //     // half duplex operation, set output enable
                 //     palSpi->Handle->spi->CR1 &= ~SPI_CR1_BIDIOE;
                 // }
-                NF_SpiDriver_ReceiveBlocking(palSpi->Handle, palSpi->ReadBuffer, palSpi->ReadSize);
+                transferResult = NF_SpiDriver_MReceiveB(palSpi->Handle, palSpi->ReadBuffer, palSpi->ReadSize);
             }
             else
             {
@@ -432,9 +459,11 @@ static HRESULT SPI_nWrite_nRead(
                     // half duplex operation, set output enable
                     // palSpi->Handle->spi->CR1 |= SPI_CR1_BIDIOE;
                 }
-                NF_SpiDriver_TransmitBlocking(palSpi->Handle, palSpi->WriteBuffer, palSpi->WriteSize);
+                transferResult = NF_SpiDriver_MTransmitB(palSpi->Handle, palSpi->WriteBuffer, palSpi->WriteSize);
             }
         }
+
+        NANOCLR_SET_AND_LEAVE(transferResult);
     }
     else
     {
@@ -454,7 +483,7 @@ static HRESULT SPI_nWrite_nRead(
                 palSpi->SequentialTxRx = false;
 
                 // Uses the largest buffer size as transfer size
-                NF_SpiDriver_Transfer(
+                NF_SpiDriver_MTransfer(
                     palSpi->Handle,
                     palSpi->WriteBuffer,
                     palSpi->ReadBuffer,
@@ -474,7 +503,7 @@ static HRESULT SPI_nWrite_nRead(
                 }
 
                 // receive operation will be started in the callback after the above completes
-                NF_SpiDriver_Transmit(
+                NF_SpiDriver_MTransmit(
                     palSpi->Handle,
                     palSpi->WriteBuffer,
                     palSpi->WriteSize,
@@ -490,7 +519,11 @@ static HRESULT SPI_nWrite_nRead(
                 palSpi->SequentialTxRx = false;
 
                 // start receive
-                NF_SpiDriver_Receive(palSpi->Handle, palSpi->ReadBuffer, palSpi->ReadSize, SpiTransferCompleteCallback);
+                NF_SpiDriver_MReceive(
+                    palSpi->Handle,
+                    palSpi->ReadBuffer,
+                    palSpi->ReadSize,
+                    SpiTransferCompleteCallback);
             }
             else
             {
@@ -498,7 +531,7 @@ static HRESULT SPI_nWrite_nRead(
                 palSpi->SequentialTxRx = false;
 
                 // start send
-                NF_SpiDriver_Transmit(
+                NF_SpiDriver_MTransmit(
                     palSpi->Handle,
                     palSpi->WriteBuffer,
                     palSpi->WriteSize,
@@ -651,6 +684,44 @@ HRESULT Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_
     realClk = (refFreq - 1) / (2 * clockDivValue);
 
     stack.SetResult_I4(realClk);
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_Spi_SpiBus::ThrowError(
+    CLR_RT_StackFrame &stack,
+    CLR_UINT32 errorCode)
+{
+    NANOCLR_HEADER();
+
+    SpiError spiErrorCode;
+
+    CLR_RT_HeapBlock &res = stack.m_owningThread->m_currentException;
+
+    if ((Library_corlib_native_System_Exception::CreateInstance(
+            res,
+            g_CLR_RT_WellKnownTypes.m_SocketException,
+            CLR_E_FAIL,
+            &stack)) == S_OK)
+    {
+        // Set the error code
+        if (errorCode == ECODE_EMDRV_SPIDRV_TIMEOUT)
+        {
+            spiErrorCode = SpiError_Timeout;
+        }
+        else if (errorCode == ECODE_EMDRV_SPIDRV_ABORTED)
+        {
+            spiErrorCode = SpiError_Aborted;
+        }
+        else
+        {
+            spiErrorCode = SpiError_Unknown;
+        }
+
+        res.Dereference()[SpiException::FIELD___errorCode].SetInteger((CLR_UINT32)spiErrorCode);
+    }
+
+    NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
 
     NANOCLR_NOCLEANUP();
 }

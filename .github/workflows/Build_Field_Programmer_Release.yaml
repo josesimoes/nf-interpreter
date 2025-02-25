@@ -1,0 +1,12 @@
+name: Build FIELD_PROG_Release
+
+on:
+  workflow_dispatch
+
+jobs:
+  build_FIELD_PROG_Release:
+    name: Build FIELD_PROG_Release
+    uses: ./.github/workflows/skyworks_evb_build.yaml
+    with:
+      targetName: 'FIELD_PROG'
+      buildType: 'MinSizeRel'

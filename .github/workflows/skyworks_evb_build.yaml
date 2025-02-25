@@ -7,6 +7,9 @@ on:
       targetName:
         required: true
         type: string
+      buildType:
+        required: true
+        type: string
 
 jobs:
   build-skyworks-target:
@@ -49,7 +52,6 @@ jobs:
 
           echo "SRECORD_PATH=$srecPath" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
 
-
       - name: Install arm-none-eabi-gcc
         uses: carlosperate/arm-none-eabi-gcc-action@v1
         with:
@@ -86,9 +88,9 @@ jobs:
       - uses: lukka/run-cmake@v10
         with:
           configurePreset: '${{ inputs.targetName }}'
-          configurePresetAdditionalArgs: "['-DBUILD_VERSION=${{env.NBGV_VersionMajor}}.${{env.NBGV_VersionMinor}}.${{env.NBGV_BuildNumber}}.${{env.NBGV_VersionHeight}}','-DCMAKE_BUILD_TYPE=MinSizeRel','-DTOOL_SRECORD_PREFIX=${{ env.SRECORD_PATH }}']"
+          configurePresetAdditionalArgs: "['-DBUILD_VERSION=${{env.NBGV_VersionMajor}}.${{env.NBGV_VersionMinor}}.${{env.NBGV_BuildNumber}}.${{env.NBGV_VersionHeight}}','-DCMAKE_BUILD_TYPE=${{ inputs.buildType }}','-DTOOL_SRECORD_PREFIX=${{ env.SRECORD_PATH }}']"
           buildPreset: '${{ inputs.targetName }}'
-          buildPresetAdditionalArgs: "['--config MinSizeRel']"
+          buildPresetAdditionalArgs: "['--config ${{ inputs.buildType }}']"
 
       - name: Collect metadata
         run: |
@@ -114,13 +116,25 @@ jobs:
 
       - name: Tag the build
         if: ${{ github.event.pull_request.number == null }}
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const {DIST_VERSION} = process.env          
-            github.rest.git.createRef({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                ref: 'refs/tags/${{ inputs.targetName }}-v${{env.NBGV_VersionMajor}}.${{env.NBGV_VersionMinor}}.${{env.NBGV_BuildNumber}}.${{env.NBGV_VersionHeight}}',
-                sha: context.sha
-            })
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $tagLabel = "${{ inputs.targetName }}-"
+          if ("${{ inputs.buildType }}" -eq 'Debug') {
+            $tagLabel += "Debug"
+          } else {
+            $tagLabel += "Release"
+          }
+          $tagLabel += "-v${{ env.NBGV_VersionMajor }}.${{ env.NBGV_VersionMinor }}.${{ env.NBGV_BuildNumber }}.${{ env.NBGV_VersionHeight }}"
+          
+          $body = @{
+            ref = "refs/tags/$tagLabel"
+            sha = "${{ github.sha }}"
+          } | ConvertTo-Json
+
+          $headers = @{
+            Authorization = "token $env:GITHUB_TOKEN"
+          }
+
+          Invoke-RestMethod -Uri "https://api.github.com/repos/${{ github.repository_owner }}/${{ github.event.repository.name }}/git/refs" -Method Post -Body $body -Headers $headers
