@@ -381,3 +381,4 @@ CMakeUserPresets.json
 config/user-tools-repos.json
 config/user-prefs.json
 targets/AzureRTOS/SiliconLabs/Si5575_CEVB/.vscode/settings.json
+CMakePresets.json
