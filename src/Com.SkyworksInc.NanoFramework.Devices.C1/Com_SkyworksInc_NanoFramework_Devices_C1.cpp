@@ -9,6 +9,7 @@
 #include "Com_SkyworksInc_NanoFramework_Devices_C1.h"
 
 // clang-format off
+
 static const CLR_RT_MethodHandler method_lookup[] =
 {
     NULL,
@@ -35,7 +36,7 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Com_SkyworksInc_NanoFramewo
     // 0x3CD033AA,
     0x3FCDA50E,
     method_lookup,
-    { 1, 0, 0, 0 }
+    { 2, 0, 0, 0 }
 };
 
 // clang-format on

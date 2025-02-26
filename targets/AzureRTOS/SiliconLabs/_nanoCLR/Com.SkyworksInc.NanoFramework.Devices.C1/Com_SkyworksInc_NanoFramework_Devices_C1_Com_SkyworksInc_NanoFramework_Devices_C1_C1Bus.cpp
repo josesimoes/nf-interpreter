@@ -795,35 +795,35 @@ void TIMER0_IRQHandler()
                 break;
             case RD_START_1:
                 // GPIO_PinOutClear(gpioPort, gpioPin);
-                GPIO_SIGNAL(0);
+                GPIO_SIGNAL(1);
                 currentStateRD = RD_START_1_2;
                 break;
             case RD_START_1_2:
                 currentStateRD = RD_START_2;
                 break;
             case RD_START_2:
-                GPIO_SIGNAL(1);
+                GPIO_SIGNAL(0);
                 currentStateRD = RD_START_2_2;
                 break;
             case RD_START_2_2:
                 currentStateRD = RD_ADDRESS_FOLLOW;
                 break;
             case RD_ADDRESS_FOLLOW:
-                GPIO_SIGNAL(0);
+                GPIO_SIGNAL(1);
                 currentStateRD = RD_ADDRESS_FOLLOW_2;
                 break;
             case RD_ADDRESS_FOLLOW_2:
                 currentStateRD = RD_SLOW_ACCESS;
                 break;
             case RD_SLOW_ACCESS:
-                GPIO_SIGNAL(1);
+                GPIO_SIGNAL(0);
                 currentStateRD = RD_SLOW_ACCESS_2;
                 break;
             case RD_SLOW_ACCESS_2:
                 currentStateRD = RD_INSTRUCTION_1;
                 break;
             case RD_INSTRUCTION_1:
-                GPIO_SIGNAL(0);
+                GPIO_SIGNAL(1);
 
                 if(instruction0 == 1 && writeLogical1 < 3) {
                     writeLogical1++;
@@ -844,7 +844,7 @@ void TIMER0_IRQHandler()
                 }
                 break;
             case RD_INSTRUCTION_2:
-                GPIO_SIGNAL(1);
+                GPIO_SIGNAL(0);
 
                 if(instruction1 == 1 && writeLogical1 < 3) {
                     writeLogical1++;
@@ -864,14 +864,14 @@ void TIMER0_IRQHandler()
                 }
                 break;
             case RD_INCREMENT:
-                GPIO_SIGNAL(0);
+                GPIO_SIGNAL(1);
                 currentStateRD = RD_INCREMENT_2;
                 break;
             case RD_INCREMENT_2:
                 currentStateRD = RD_READ_1;
                 break;
             case RD_READ_1:
-                GPIO_SIGNAL(1);
+                GPIO_SIGNAL(0);
                 currentStateRD = RD_READ_1_2;
                 break;
             case RD_READ_1_2:
@@ -920,7 +920,7 @@ void TIMER0_IRQHandler()
                 break;
             case RD_READ_5_2:
                 // if value is 1 we need to pull the line low for an extra cycle in READ_6
-                if(pinValue) {
+                if(!pinValue) {
                     // GPIO_SIGNAL(1);
                     currentStateRD = RD_READ_6;
                 }
@@ -938,7 +938,7 @@ void TIMER0_IRQHandler()
                 break;
             case RD_READ_6:
                 // set pin to low
-                GPIO_SIGNAL(0);
+                GPIO_SIGNAL(1);
 
                 // stay at this state for 2 cycles
                 if(tRest < 2) {
@@ -958,7 +958,7 @@ void TIMER0_IRQHandler()
                 break;
             
             case RD_STATE_END:
-                GPIO_SIGNAL(1);
+                GPIO_SIGNAL(0);
                 TIMER_Enable(TIMER0, false);
                 break;
 
@@ -977,23 +977,23 @@ void TIMER0_IRQHandler()
                 break;
             case START_1:
                 // GPIO_PinOutClear(gpioPort, gpioPin);
-                GPIO_SIGNAL(0);
+                GPIO_SIGNAL(1);
                 currentState = START_2;
                 break;
             case START_2:
-                GPIO_SIGNAL(1);
+                GPIO_SIGNAL(0);
                 currentState = ADDRESS_FOLLOW;
                 break;
             case ADDRESS_FOLLOW:
-                GPIO_SIGNAL(0);
+                GPIO_SIGNAL(1);
                 currentState = SLOW_ACCESS;
                 break;
             case SLOW_ACCESS:
-                GPIO_SIGNAL(1);
+                GPIO_SIGNAL(0);
                 currentState = INSTRUCTION_1;
                 break;
             case INSTRUCTION_1:
-                GPIO_SIGNAL(0);
+                GPIO_SIGNAL(1);
 
                 if(instruction0 == 1 && writeLogical1 < 3) {
                     writeLogical1++;
@@ -1005,7 +1005,7 @@ void TIMER0_IRQHandler()
 
                 break;
             case INSTRUCTION_2:
-                GPIO_SIGNAL(1);
+                GPIO_SIGNAL(0);
 
                 if(instruction1 == 1 && writeLogical1 < 3) {
                     writeLogical1++;
@@ -1016,7 +1016,7 @@ void TIMER0_IRQHandler()
                 }
                 break;
             case INCREMENT:
-                GPIO_SIGNAL(0);
+                GPIO_SIGNAL(1);
 
                 // Determine the next state
                 switch(instruction) {
@@ -1030,87 +1030,8 @@ void TIMER0_IRQHandler()
                         break;
                 }
                 break;
-            case READ_1:
-                GPIO_SIGNAL(1);
-                currentState = READ_2;
-                break;
-            case READ_2:
-                // GPIO_SIGNAL(2);
-                currentState = READ_3;            
-                break;
-            case READ_3:
-                // GPIO_SIGNAL(2);      // set gpio to high-z
-                start_cnt = TIMER0->CNT;
-
-                // delay in order to allow the DUT to respond
-                while((TIMER0->CNT - start_cnt) < 3)
-                {
-                }
-                pinValue = GPIO_READ();
-
-                // keep the signal LOW or HIGH depending on what the DUT signal was
-                if(pinValue){
-                    GPIO_SIGNAL(1);
-                }
-                else {
-                    GPIO_SIGNAL(0);
-                }
-
-                currentState = READ_4;
-                break;
-            case READ_4:            
-                // modify the current bit of transfer_data which holds the register
-                // value
-                if(pinValue) {
-                    transfer_data |= (1 << bitToRead);
-                }
-                else {
-                    transfer_data &= ~(1 << bitToRead);
-                }
-
-                bitToRead++;
-                currentState = READ_5;
-                break;
-            case READ_5:
-                // if value is 1 we need to pull the line low for an extra cycle in READ_6
-                if(pinValue) {
-                    // GPIO_SIGNAL(1);
-                    currentState = READ_6;
-                }
-                else {
-                    // GPIO_SIGNAL(0);
-                    // byte value is 0 and there's still values to read go back to
-                    // READ_1, if not go to STATE_END
-                    if(bitToRead < 8) {
-                        currentState = READ_1;
-                    }
-                    else {
-                        currentState = STATE_END;
-                    }
-                }
-                break;
-            case READ_6:
-                // set pin to low
-                GPIO_SIGNAL(0);
-
-                // stay at this state for 2 cycles
-                if(tRest < 1) {
-                    tRest++;
-                }
-                else {
-                    tRest = 0;
-                    // if there's more bits to read go back to READ_1
-                    // else go to end
-                    if(bitToRead < 8){
-                        currentState = READ_1;
-                    }
-                    else {
-                        currentState = STATE_END;
-                    }
-                }
-                break;
             case DATA_1:
-                GPIO_SIGNAL(1);
+                GPIO_SIGNAL(0);
 
                 write_bit = (transfer_data & (1 << 0)) >> 0;
             
@@ -1124,7 +1045,7 @@ void TIMER0_IRQHandler()
 
                 break;
             case DATA_2:
-                GPIO_SIGNAL(0);
+                GPIO_SIGNAL(1);
 
                 write_bit = (transfer_data & (1 << 1)) >> 1;
             
@@ -1137,7 +1058,7 @@ void TIMER0_IRQHandler()
                 }
                 break;
             case DATA_3:
-                GPIO_SIGNAL(1);
+                GPIO_SIGNAL(0);
 
                 write_bit = (transfer_data & (1 << 2)) >> 2;
             
@@ -1150,7 +1071,7 @@ void TIMER0_IRQHandler()
                 }
                 break;
             case DATA_4:
-                GPIO_SIGNAL(0);
+                GPIO_SIGNAL(1);
 
                 write_bit = (transfer_data & (1 << 3)) >> 3;
             
@@ -1163,7 +1084,7 @@ void TIMER0_IRQHandler()
                 }
                 break;
             case DATA_5:
-                GPIO_SIGNAL(1);
+                GPIO_SIGNAL(0);
 
                 write_bit = (transfer_data & (1 << 4)) >> 4;
             
@@ -1176,7 +1097,7 @@ void TIMER0_IRQHandler()
                 }
                 break;
             case DATA_6:
-                GPIO_SIGNAL(0);
+                GPIO_SIGNAL(1);
 
                 write_bit = (transfer_data & (1 << 5)) >> 5;
             
@@ -1189,7 +1110,7 @@ void TIMER0_IRQHandler()
                 }
                 break;
             case DATA_7:
-                GPIO_SIGNAL(1);
+                GPIO_SIGNAL(0);
 
                 write_bit = (transfer_data & (1 << 6)) >> 6;
             
@@ -1202,7 +1123,7 @@ void TIMER0_IRQHandler()
                 }
                 break;
             case DATA_8:
-                GPIO_SIGNAL(0);
+                GPIO_SIGNAL(1);
 
                 write_bit = (transfer_data & (1 << 7)) >> 7;
             
@@ -1215,7 +1136,7 @@ void TIMER0_IRQHandler()
                 }
                 break;
             case STATE_END:
-                GPIO_SIGNAL(1);
+                GPIO_SIGNAL(0);
                 TIMER_Enable(TIMER0, false);
                 break;
 
