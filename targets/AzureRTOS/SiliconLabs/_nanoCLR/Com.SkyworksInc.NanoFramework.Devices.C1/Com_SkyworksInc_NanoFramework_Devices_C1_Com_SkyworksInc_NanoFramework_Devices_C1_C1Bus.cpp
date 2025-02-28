@@ -878,7 +878,8 @@ void TIMER0_IRQHandler()
                 currentStateRD = RD_READ_2;
                 break;
             case RD_READ_2:
-                currentStateRD = RD_READ_2_2;            
+                currentStateRD = RD_READ_2_2;
+                GPIO_SIGNAL(2);            
                 break;
             case RD_READ_2_2:
                 currentStateRD = RD_READ_3;
@@ -887,6 +888,32 @@ void TIMER0_IRQHandler()
                 currentStateRD = RD_READ_3_2;
                 break;
             case RD_READ_3_2:
+                // pinValue = GPIO_READ();
+
+                // // keep the signal LOW or HIGH depending on what the DUT signal was
+                // if(pinValue){
+                //     GPIO_SIGNAL(1);
+                // }
+                // else {
+                //     GPIO_SIGNAL(0);
+                // }
+
+                currentStateRD = RD_READ_4;
+                break;
+            case RD_READ_4:            
+                // modify the current bit of transfer_data which holds the register
+                // value
+                // if(pinValue) {
+                //     transfer_data |= (1 << bitToRead);
+                // }
+                // else {
+                //     transfer_data &= ~(1 << bitToRead);
+                // }
+
+                // bitToRead++;
+                currentStateRD = RD_READ_4_2;
+                break;
+            case RD_READ_4_2:
                 pinValue = GPIO_READ();
 
                 // keep the signal LOW or HIGH depending on what the DUT signal was
@@ -897,11 +924,9 @@ void TIMER0_IRQHandler()
                     GPIO_SIGNAL(0);
                 }
 
-                currentStateRD = RD_READ_4;
+                currentStateRD = RD_READ_5;
                 break;
-            case RD_READ_4:            
-                // modify the current bit of transfer_data which holds the register
-                // value
+            case RD_READ_5:
                 if(pinValue) {
                     transfer_data |= (1 << bitToRead);
                 }
@@ -910,12 +935,7 @@ void TIMER0_IRQHandler()
                 }
 
                 bitToRead++;
-                currentStateRD = RD_READ_4_2;
-                break;
-            case RD_READ_4_2:
-                currentStateRD = RD_READ_5;
-                break;
-            case RD_READ_5:
+
                 currentStateRD = RD_READ_5_2;
                 break;
             case RD_READ_5_2:
