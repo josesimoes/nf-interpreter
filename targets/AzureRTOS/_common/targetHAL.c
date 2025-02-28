@@ -6,7 +6,8 @@
 #include <nanoHAL_v2.h>
 #include <platform_target_capabilities.h>
 
-void HAL_AssertEx()
+// Implemented as "weak" to allow it to be replaced with "hard" implementation at target level.
+__nfweak void HAL_AssertEx()
 {
     __asm("BKPT #0\n");
     while (true)

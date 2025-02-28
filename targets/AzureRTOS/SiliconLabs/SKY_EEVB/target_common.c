@@ -9,6 +9,8 @@
 #include <target_common.h>
 #include <platform_target_capabilities.h>
 
+#include <em_gpio.h>
+
 HAL_SYSTEM_CONFIG HalSystemConfig = {
     {true}, // HAL_DRIVER_CONFIG_HEADER Header;
 
@@ -25,3 +27,12 @@ HAL_TARGET_CONFIGURATION g_TargetConfiguration;
 // this target can use J-Link for updates
 inline GET_TARGET_CAPABILITIES(TargetCapabilities_JlinkUpdate);
 inline TARGET_HAS_PROPRIETARY_BOOTER(false);
+
+void HAL_AssertEx()
+{
+    while (true)
+    { 
+        GPIO_PinOutToggle(gpioPortB, 12);
+        for(int i = 0; i < 100000; i++) { __NOP(); }
+    }
+}
