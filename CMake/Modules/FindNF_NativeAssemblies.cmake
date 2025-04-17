@@ -58,6 +58,7 @@ option(API_Hardware.GiantGecko                          "option for Hardware.Gia
 
 ###################################
 # add options for private APIs here
+option(API_Com.SkyworksInc.NanoFramework.Devices.C1                    "option for Skyworks C1 API")
 option(API_Com.SkyworksInc.NanoFramework.Devices.I2c                   "option for Skyworks I2C API")
 option(API_Com.SkyworksInc.NanoFramework.Devices.Spi                   "option for Skyworks SPI API")
 ###################################
@@ -461,6 +462,12 @@ ParseInteropAssemblies()
 
 ##################################
 # add parsing of private APIs here
+
+# Com.SkyworksInc.NanoFramework.Devices.C1
+if(API_Com.SkyworksInc.NanoFramework.Devices.C1)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("Com.SkyworksInc.NanoFramework.Devices.C1")
+endif()
 
 # Com.SkyworksInc.NanoFramework.Devices.I2c
 if(API_Com.SkyworksInc.NanoFramework.Devices.I2c)
