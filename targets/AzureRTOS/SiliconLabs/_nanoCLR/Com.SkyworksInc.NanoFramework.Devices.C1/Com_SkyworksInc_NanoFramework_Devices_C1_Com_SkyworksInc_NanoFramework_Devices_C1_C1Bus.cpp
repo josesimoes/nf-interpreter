@@ -27,10 +27,10 @@ using namespace Com_SkyworksInc_NanoFramework_Devices_C1::Com_SkyworksInc_NanoFr
 #define MAX_C1_BUSES 4
 
 C1BusConfig_t c1BusConfigs[MAX_C1_BUSES] = {
-    {gpioPortB, 10, false},  // Bus 0
-    {gpioPortB, 11, false},  // TODO: Bus 1
-    {gpioPortC, 6,  false},  // TODO: Bus 2
-    {gpioPortC, 7,  false},  // TODO: Bus 3
+    {gpioPortB, 0, false},  // Bus 0
+    {gpioPortB, 3, false},  // TODO: Bus 1
+    {gpioPortB, 6,  false},  // TODO: Bus 2
+    {gpioPortB, 9,  false},  // TODO: Bus 3
 };
 
 // Use TIMER0 for all buses
