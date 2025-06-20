@@ -182,6 +182,10 @@ void C1Bus::NativeTransmitWriteWithAddress( uint16_t param0, uint8_t param1, uin
     // param3 is response array
 
     currentBusIndex = param0;  // Set the active bus
+    if(currentBusIndex >= MAX_C1_BUSES) {
+        hr = CLR_E_INVALID_PARAMETER;
+        return;
+    }
 
     init(currentBusIndex);
     setupGPIO(currentBusIndex);
@@ -255,8 +259,11 @@ void C1Bus::NativeTransmitReadWithAddress( uint16_t param0, uint8_t param1, CLR_
     // param1 is register address
     // param2 is response array
 
-    
     currentBusIndex = param0;  // Set the active bus
+    if(currentBusIndex >= MAX_C1_BUSES) {
+        hr = CLR_E_INVALID_PARAMETER;
+        return;
+    }
 
     init(currentBusIndex);
     setupGPIO(currentBusIndex);
@@ -334,6 +341,10 @@ void C1Bus::NativeTransmitRead( uint16_t param0, CLR_RT_TypedArray_UINT8 param1,
     
     // Set the active bus index
     currentBusIndex = param0;
+    if(currentBusIndex >= MAX_C1_BUSES) {
+        hr = CLR_E_INVALID_PARAMETER;
+        return;
+    }
 
     transfer_data = 0;
     bitToRead = 0;
@@ -391,6 +402,10 @@ void C1Bus::NativeTransmitWrite( uint16_t param0, uint8_t param1, CLR_RT_TypedAr
     
     // Set the active bus index
     currentBusIndex = param0;
+    if(currentBusIndex >= MAX_C1_BUSES) {
+        hr = CLR_E_INVALID_PARAMETER;
+        return;
+    }
 
     transfer_data = 0;
     bitToRead = 0;
@@ -444,6 +459,10 @@ void C1Bus::NativeTransmitWriteAddress( uint16_t param0, uint8_t param1, CLR_RT_
     
     // Set the active bus index
     currentBusIndex = param0;
+    if(currentBusIndex >= MAX_C1_BUSES) {
+        hr = CLR_E_INVALID_PARAMETER;
+        return;
+    }
 
     transfer_data = 0;
     bitToRead = 0;
@@ -494,6 +513,10 @@ void C1Bus::NativeTransmitReadAddress( uint16_t param0, CLR_RT_TypedArray_UINT8 
 
     // Set the active bus index
     currentBusIndex = param0;
+    if(currentBusIndex >= MAX_C1_BUSES) {
+        hr = CLR_E_INVALID_PARAMETER;
+        return;
+    }
 
     transfer_data = 0;
     bitToRead = 0;
@@ -530,6 +553,8 @@ void C1Bus::NativeTransmitReadAddress( uint16_t param0, CLR_RT_TypedArray_UINT8 
 
 void init(uint8_t busIndex)
 {
+    if(busIndex >= MAX_C1_BUSES) return;
+
     for (volatile uint32_t i = 0; i < 64; i++) {
         // Empty loop to create delay
     }
