@@ -4216,7 +4216,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     CLR_RT_TypeDef_Index byteType = g_CLR_RT_WellKnownTypes.UInt8;
 
                     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(tempArray, size, byteType));
-      
+
                     CLR_RT_ProtectFromGC gc(tempArray);
                     CLR_RT_HeapBlock_Array *array = tempArray.DereferenceArray();
 
