@@ -355,7 +355,7 @@ bool CLR_RT_EventCache::VirtualMethodTable::FindVirtualMethod(
 
     for (index = m_entries[indexHead].m_next;; index = m_entries[index].m_next)
     {
-#if defined (DEBUG) && defined(_WIN64)
+#if defined(DEBUG) && defined(_WIN64)
         CLR_Debug::Printf("  Loop: index=%u, indexHead=%u\r\n", index, indexHead);
 #endif
 
@@ -399,7 +399,7 @@ bool CLR_RT_EventCache::VirtualMethodTable::FindVirtualMethod(
 
             index = GetNewEntry();
 
-#if defined (DEBUG) && defined(_WIN64)
+#if defined(DEBUG) && defined(_WIN64)
             CLR_Debug::Printf("  GetNewEntry returned: %u\r\n", index);
 #endif
 
