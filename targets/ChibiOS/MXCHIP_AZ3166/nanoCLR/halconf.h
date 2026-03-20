@@ -139,11 +139,12 @@
 
 /**
  * @brief   Enables the SDC subsystem.
+ * @note    Must be FALSE — WICED WiFi driver owns SDIO directly.
+ *          ChibiOS SDC must NOT initialize the SDIO peripheral.
  */
-// this option is set at target_platform.h (from config file)
-// #if !defined(HAL_USE_SDC) || defined(__DOXYGEN__)
-// #define HAL_USE_SDC                          FALSE
-// #endif
+#if !defined(HAL_USE_SDC) || defined(__DOXYGEN__)
+#define HAL_USE_SDC                         FALSE
+#endif
 
 /**
  * @brief   Enables the SERIAL subsystem.

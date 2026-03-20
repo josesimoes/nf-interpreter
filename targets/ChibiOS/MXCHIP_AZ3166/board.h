@@ -623,7 +623,7 @@
  * PC8  - SDIO_D0 SDMMC_D0          (alternate 12).
  * PC9  - SDIO_D1 SDMMC_D1          (alternate 12).
  * PC10 - SDIO_D2 SDMMC_D2          (alternate 12).
- * PC11 - ZIO_D46 SDMMC_D3          (alternate 12).
+ * PC11 - ZIO_D46                    (input pullup) NOTE: SDIO_D3 is on PB5, not PC11.
  * PC12 - SDIO_CK SDMMC_CK          (alternate 12).
  * PC13 - LED2                      (output pushpull low).
  * PC14 - OSC32_IN                  (input floating).
@@ -640,7 +640,7 @@
                                      PIN_MODE_ALTERNATE(GPIOC_SDIO_D0)          | \
                                      PIN_MODE_ALTERNATE(GPIOC_SDIO_D1)          | \
                                      PIN_MODE_ALTERNATE(GPIOC_SDIO_D2)          | \
-                                     PIN_MODE_ALTERNATE(GPIOC_ZIO_D46)          | \
+                                     PIN_MODE_INPUT(GPIOC_ZIO_D46)              | \
                                      PIN_MODE_ALTERNATE(GPIOC_SDIO_CK)          | \
                                      PIN_MODE_OUTPUT(GPIOC_LED2)                | \
                                      PIN_MODE_INPUT(GPIOC_OSC32_IN)             | \
@@ -688,7 +688,7 @@
                                      PIN_PUPDR_FLOATING(GPIOC_SDIO_D0)          | \
                                      PIN_PUPDR_FLOATING(GPIOC_SDIO_D1)          | \
                                      PIN_PUPDR_FLOATING(GPIOC_SDIO_D2)          | \
-                                     PIN_PUPDR_FLOATING(GPIOC_ZIO_D46)          | \
+                                     PIN_PUPDR_PULLUP(GPIOC_ZIO_D46)            | \
                                      PIN_PUPDR_FLOATING(GPIOC_SDIO_CK)          | \
                                      PIN_PUPDR_FLOATING(GPIOC_LED2)             | \
                                      PIN_PUPDR_FLOATING(GPIOC_OSC32_IN)         | \
@@ -720,7 +720,7 @@
 #define VAL_GPIOC_AFRH              (PIN_AFIO_AF(GPIOC_SDIO_D0, 12U)            | \
                                      PIN_AFIO_AF(GPIOC_SDIO_D1, 12U)            | \
                                      PIN_AFIO_AF(GPIOC_SDIO_D2, 12U)            | \
-                                     PIN_AFIO_AF(GPIOC_ZIO_D46, 12U)            | \
+                                     PIN_AFIO_AF(GPIOC_ZIO_D46, 0U)             | \
                                      PIN_AFIO_AF(GPIOC_SDIO_CK, 12U)            | \
                                      PIN_AFIO_AF(GPIOC_LED2, 0U)                | \
                                      PIN_AFIO_AF(GPIOC_OSC32_IN, 0U)            | \
