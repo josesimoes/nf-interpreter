@@ -33,6 +33,14 @@
 #define PERIODIC_TIMER_ID 1
 #define FRAME_RECEIVED_ID 2
 
+#if defined(WWD_BUS_PROTOCOL_SDIO)
+// WiFi path: WICED SDK's wwd_network.c provides the lwIP netif functions
+// (ethernetif_init, low_level_output, host_network_process_ethernet_data).
+#include "wwd_wifi.h"
+#include "wwd_constants.h"
+extern err_t ethernetif_init(struct netif *netif);
+#endif
+
 /*
  * Suspension point for initialization procedure.
  */
@@ -43,6 +51,7 @@ thread_reference_t lwip_trp = NULL;
  */
 static THD_WORKING_AREA(wa_lwip_thread, LWIP_THREAD_STACK_SIZE);
 
+#if HAL_USE_MAC
 /*
  * Initialization.
  */
@@ -226,6 +235,7 @@ static err_t ethernetif_init(struct netif *netif)
 
     return ERR_OK;
 }
+#endif /* HAL_USE_MAC */
 
 static struct netif thisif = {0};
 static net_addr_mode_t addressMode;
@@ -298,8 +308,11 @@ void lwipDefaultLinkDownCB(void *p)
 static THD_FUNCTION(lwip_thread, p)
 {
     event_timer_t evt;
-    event_listener_t el0, el1;
+    event_listener_t el0;
+#if HAL_USE_MAC
+    event_listener_t el1;
     static const MACConfig mac_config = {thisif.hwaddr};
+#endif
     err_t result;
     tcpip_callback_fn link_up_cb = NULL;
     tcpip_callback_fn link_down_cb = NULL;
@@ -372,9 +385,16 @@ static THD_FUNCTION(lwip_thread, p)
         link_down_cb = lwipDefaultLinkDownCB;
     }
 
+#if HAL_USE_MAC
     macStart(&ETHD1, &mac_config);
+#endif
 
     MIB2_INIT_NETIF(&thisif, snmp_ifType_ethernet_csmacd, 0);
+
+#if defined(WWD_BUS_PROTOCOL_SDIO)
+    // WiFi: set interface type so the WICED ethernetif_init knows which radio to use
+    thisif.state = (void *)WWD_STA_INTERFACE;
+#endif
 
     /* Add interface. */
     result = netifapi_netif_add(&thisif, &ip, &netmask, &gateway, NULL, ethernetif_init, tcpip_input);
@@ -391,8 +411,12 @@ static THD_FUNCTION(lwip_thread, p)
     evtObjectInit(&evt, LWIP_LINK_POLL_INTERVAL);
     evtStart(&evt);
     chEvtRegisterMask(&evt.et_es, &el0, PERIODIC_TIMER_ID);
+#if HAL_USE_MAC
     chEvtRegisterMaskWithFlags(macGetEventSource(&ETHD1), &el1, FRAME_RECEIVED_ID, MAC_FLAGS_RX);
     chEvtAddEvents(PERIODIC_TIMER_ID | FRAME_RECEIVED_ID);
+#else
+    chEvtAddEvents(PERIODIC_TIMER_ID);
+#endif
 
     /* Resumes the caller and goes to the final priority.*/
     chThdResume(&lwip_trp, MSG_OK);
@@ -412,7 +436,13 @@ static THD_FUNCTION(lwip_thread, p)
         eventmask_t mask = chEvtWaitAny(ALL_EVENTS);
         if (mask & PERIODIC_TIMER_ID)
         {
+#if HAL_USE_MAC
             bool current_link_status = macPollLinkStatus(&ETHD1);
+#elif defined(WWD_BUS_PROTOCOL_SDIO)
+            bool current_link_status = (wwd_wifi_is_ready_to_transceive(WWD_STA_INTERFACE) == WWD_SUCCESS);
+#else
+            bool current_link_status = false;
+#endif
             if (current_link_status != netif_is_link_up(&thisif))
             {
                 if (current_link_status)
@@ -428,6 +458,7 @@ static THD_FUNCTION(lwip_thread, p)
             }
         }
 
+#if HAL_USE_MAC
         if (mask & FRAME_RECEIVED_ID)
         {
             struct pbuf *workBuffer;
@@ -452,6 +483,7 @@ static THD_FUNCTION(lwip_thread, p)
                 }
             }
         }
+#endif /* HAL_USE_MAC */
     }
 }
 

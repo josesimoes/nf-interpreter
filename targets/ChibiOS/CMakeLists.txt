@@ -224,6 +224,52 @@ if(USE_SECURITY_MBEDTLS_OPTION OR NF_REQUIRES_MBEDTLS)
 
 endif()
 
+# if WICED WiFi driver is enabled add SDK to the build
+if("${WIFI_DRIVER}" STREQUAL "WICED_BCM43362")
+
+    # check if WICED_SDK_SOURCE was specified or if it's empty (default is empty)
+    set(NO_WICED_SDK_SOURCE TRUE)
+    if(WICED_SDK_SOURCE)
+        if(NOT "${WICED_SDK_SOURCE}" STREQUAL "")
+            set(NO_WICED_SDK_SOURCE FALSE)
+        endif()
+    endif()
+
+    if(NO_WICED_SDK_SOURCE)
+        message(STATUS "WICED SDK from GitHub repo")
+
+        FetchContent_Declare(
+            wiced_sdk
+            GIT_REPOSITORY https://github.com/voitaynguyen00/WICED_SDK_6.6.git
+            GIT_TAG main
+            GIT_SHALLOW ON
+        )
+
+    else()
+        # WICED SDK source was specified
+
+        message(STATUS "WICED SDK (source from: ${WICED_SDK_SOURCE})")
+
+        FetchContent_Declare(
+            wiced_sdk
+            SOURCE_DIR ${WICED_SDK_SOURCE}
+        )
+
+    endif()
+
+    # Check if population has already been performed
+    FetchContent_GetProperties(wiced_sdk)
+    if(NOT wiced_sdk_POPULATED)
+        # Fetch the content using previously declared details
+        FetchContent_MakeAvailable(wiced_sdk)
+    endif()
+
+    set(WICED_SDK_PATH ${wiced_sdk_SOURCE_DIR}/43xxx_Wi-Fi CACHE INTERNAL "WICED SDK source path")
+
+    message(STATUS "WICED SDK path: ${WICED_SDK_PATH}")
+
+endif()
+
 # set target base location
 # this has to be set before the class library modules are pulled in
 if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/targets/ChibiOS/${TARGET_BOARD})

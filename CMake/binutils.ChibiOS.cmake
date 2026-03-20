@@ -191,22 +191,40 @@ macro(nf_add_platform_dependencies target)
         # nF feature: networking
         if(USE_NETWORKING_OPTION)
 
+            # gather extra includes and definitions for the network library
+            set(_NF_NET_EXTRA_INCLUDES
+                ${CHIBIOS_INCLUDE_DIRS}
+                ${CHIBIOS_HAL_INCLUDE_DIRS}
+                ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
+                ${TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS}
+                ${lWIP_INCLUDE_DIRS}
+                ${ChibiOSnfOverlay_INCLUDE_DIRS}
+                ${CHIBIOS_FATFS_INCLUDE_DIRS}
+                ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
+                ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
+            )
+
+            # only enable ChibiOS MAC HAL when there is no WiFi driver (i.e. Ethernet targets)
+            if(NOT WIFI_DRIVER)
+                set(_NF_NET_EXTRA_DEFS -DHAL_USE_MAC=TRUE)
+            else()
+                set(_NF_NET_EXTRA_DEFS -DHAL_USE_MAC=FALSE)
+            endif()
+
+            # add WICED SDK paths when WiFi driver is enabled
+            if("${WIFI_DRIVER}" STREQUAL "WICED_BCM43362")
+                list(APPEND _NF_NET_EXTRA_INCLUDES ${WICED_SDK_INCLUDE_DIRS})
+                list(APPEND _NF_NET_EXTRA_DEFS ${WICED_SDK_COMPILE_DEFINITIONS})
+            endif()
+
             nf_add_lib_network(
                 BUILD_TARGET
                     ${target}
                 EXTRA_SOURCES
                     ${lWIP_SOURCES}
                 EXTRA_INCLUDES 
-                    ${CHIBIOS_INCLUDE_DIRS}
-                    ${CHIBIOS_HAL_INCLUDE_DIRS}
-                    ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
-                    ${TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS}
-                    ${lWIP_INCLUDE_DIRS}
-                    ${ChibiOSnfOverlay_INCLUDE_DIRS}
-                    ${CHIBIOS_FATFS_INCLUDE_DIRS}
-                    ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
-                    ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
-                EXTRA_COMPILE_DEFINITIONS -DHAL_USE_MAC=TRUE)
+                    ${_NF_NET_EXTRA_INCLUDES}
+                EXTRA_COMPILE_DEFINITIONS ${_NF_NET_EXTRA_DEFS})
 
             add_dependencies(${target}.elf nano::NF_Network)
 
@@ -258,6 +276,16 @@ macro(nf_add_platform_include_directories target)
             ${TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS}
             ${CHIBIOS_FATFS_INCLUDE_DIRS}
         )
+
+        # WICED SDK include directories (when WiFi driver is enabled)
+        if("${WIFI_DRIVER}" STREQUAL "WICED_BCM43362")
+            target_include_directories(${target}.elf PUBLIC
+                ${WICED_SDK_INCLUDE_DIRS}
+            )
+            target_compile_definitions(${target}.elf PUBLIC
+                ${WICED_SDK_COMPILE_DEFINITIONS}
+            )
+        endif()
 
                 
         if(USE_SECURITY_MBEDTLS_OPTION)
@@ -325,6 +353,32 @@ macro(nf_add_platform_sources target)
             ${CHIBIOS_CONTRIB_SOURCES}
         )
 
+        # WICED SDK source files (compiled from source for WiFi targets)
+        if("${WIFI_DRIVER}" STREQUAL "WICED_BCM43362")
+            target_sources(${target}.elf PRIVATE
+                ${WICED_SDK_SOURCES}
+            )
+
+            # Relax strict warnings for third-party WICED SDK sources
+            # (SDK code has harmless issues like missing return in all paths)
+            foreach(_wf ${WICED_SDK_SOURCES})
+                if(_wf MATCHES "_deps/wiced_sdk-src/")
+                    if(_wf MATCHES "MCU/STM32F4xx/")
+                        # STM32F4xx platform files and StdPeriph Library need WICED's own
+                        # stm32f4xx.h (with BSRRL/BSRRH, GPIOI/J/K, RCC constants).
+                        # Force-include it so it takes precedence over ChibiOS CMSIS headers.
+                        set_source_files_properties(${_wf} PROPERTIES
+                            COMPILE_FLAGS "-include ${WICED_SDK_PATH}/WICED/platform/MCU/STM32F4xx/peripherals/libraries/stm32f4xx.h -DUSE_STDPERIPH_DRIVER -Wno-error=return-type -Wno-error=unused-variable -Wno-error=shadow -Wno-error=undef -Wno-error=implicit-fallthrough -Wno-error=enum-conversion -Wno-error=unused-parameter -Wno-error=unused-but-set-variable"
+                        )
+                    else()
+                        set_source_files_properties(${_wf} PROPERTIES
+                            COMPILE_FLAGS "-Wno-error=return-type -Wno-error=unused-variable -Wno-error=shadow -Wno-error=undef -Wno-error=implicit-fallthrough -Wno-error=enum-conversion -Wno-error=implicit-function-declaration -Wno-error=unused-but-set-variable -Dassert_param(expr)=((void)0)"
+                        )
+                    endif()
+                endif()
+            endforeach()
+        endif()
+
         if(USE_NETWORKING_OPTION)
             target_link_libraries(${target}.elf
                 nano::NF_Network
@@ -358,17 +412,6 @@ endmacro()
 # optional BOOTER_EXTRA_LINK_FLAGS extra nanoBooter link flags to pass to nf_set_link_options() 
 # optional CLR_EXTRA_LINK_FLAGS extra nanoCLR link flags to pass to nf_set_link_options() 
 macro(nf_setup_target_build)
-
-    if(${TARGET_BOARD} STREQUAL "MXCHIP_AZ3166")
-
-        # # add WICED WWM library
-        # set(CLR_EXTRA_LIBRARIES
-        #     ${CMAKE_SOURCE_DIR}/targets/ChibiOS/MXCHIP_AZ3166/libwiced_sdk_bin.a
-        # )
-
-        # # add these to the ARGN list
-        # list(APPEND ARGN CLR_EXTRA_LIBRARIES ${CLR_EXTRA_LIBRARIES})
-    endif()
 
     # OK to pass ARGN, to have it perform it's parsings and validation 
     nf_setup_target_build_common(${ARGN})

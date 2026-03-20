@@ -3,9 +3,6 @@
 
 #include <stdint.h>
 
-// #include "nx_api.h"
-// #include "tx_api.h"
-
 // wwd_constants.h
 #define RESULT_ENUM(prefix, name, value) prefix##name = (value)
 
@@ -139,18 +136,18 @@ typedef struct
 // wwd_management.h
 extern wwd_result_t wwd_management_wifi_on(wiced_country_code_t country);
 
-// wwd_network.h
-extern VOID wiced_sta_netx_duo_driver_entry(NX_IP_DRIVER* driver);
-
 // wwd_buffer_interface.h
 extern wwd_result_t wwd_buffer_init(void* native_arg);
 
 // wwd_wifi.h
+
+// ChibiOS: the join semaphore is a ChibiOS semaphore_t* (from wwd_rtos.h),
+// Pass NULL to use the internal default.
 extern wwd_result_t wwd_wifi_join(const wiced_ssid_t* ssid,
     wiced_security_t auth_type,
     const uint8_t* security_key,
     uint8_t key_length,
-    TX_SEMAPHORE* semaphore,
+    void* semaphore,
     wwd_interface_t interface);
 
 extern wwd_result_t wwd_wifi_leave(wwd_interface_t interface);

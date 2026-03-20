@@ -7,6 +7,14 @@
 #include <nanoHAL.h>
 #include <lwip/netifapi.h>
 
+#if defined(WIFI_DRIVER_ISM43362) || defined(WWD_BUS_PROTOCOL_SDIO)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wshadow"
+#include "wwd_management.h"
+#include "wwd_wifi.h"
+#pragma GCC diagnostic pop
+#endif
+
 extern "C" struct netif *nf_getNetif();
 
 //
@@ -59,7 +67,12 @@ bool Network_Interface_Close(int index)
     switch (index)
     {
         case 0:
+#if HAL_USE_MAC
             macStop(&ETHD1);
+#elif defined(WWD_BUS_PROTOCOL_SDIO)
+            wwd_wifi_leave(WWD_STA_INTERFACE);
+            wwd_management_wifi_off();
+#endif
             return true;
     }
     return false;

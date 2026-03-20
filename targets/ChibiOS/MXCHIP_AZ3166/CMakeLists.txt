@@ -6,6 +6,11 @@
 include(binutils.common)
 include(binutils.ChibiOS)
 
+# if WICED WiFi driver is enabled, include the SDK build
+if("${WIFI_DRIVER}" STREQUAL "WICED_BCM43362")
+    include(${CMAKE_CURRENT_SOURCE_DIR}/wiced/CMakeLists.txt)
+endif()
+
 nf_setup_target_build(
     HAS_NANOBOOTER
 
