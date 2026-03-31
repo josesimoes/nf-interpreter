@@ -132,6 +132,9 @@ set(WICED_SDK_INCLUDE_DIRS
     # Network: lwIP integration
     ${WICED_SDK_PATH}/WICED/network/LwIP/WWD
 
+    # lwIP core headers (needed by WICED's wwd_debug.h which includes lwip/memp.h)
+    ${lwip_SOURCE_DIR}/src/include
+
     # WICED top-level includes
     ${WICED_SDK_PATH}/include
     ${WICED_SDK_PATH}/libraries/utilities/linked_list
