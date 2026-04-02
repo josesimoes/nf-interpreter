@@ -53,7 +53,7 @@ wwd_result_t internal_host_buffer_get(wiced_buffer_t *buffer, wwd_buffer_dir_t d
 
     do
     {
-        p = pbuf_alloc(PBUF_RAW, size, PBUF_POOL);
+        p = pbuf_alloc(PBUF_RAW, size, PBUF_POOL_RX);
         if (p != NULL)
         {
             *buffer = p;
@@ -155,7 +155,7 @@ wiced_bool_t host_buffer_pool_is_full(wwd_buffer_dir_t direction)
     struct pbuf *test;
     (void)direction;
 
-    test = pbuf_alloc(PBUF_RAW, 1, PBUF_POOL);
+    test = pbuf_alloc(PBUF_RAW, 1, PBUF_POOL_RX);
     if (test == NULL)
     {
         return WICED_TRUE;

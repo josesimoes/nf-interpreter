@@ -14,7 +14,6 @@
 #
 # Requires:
 #   WICED_SDK_PATH — set by the FetchContent block in targets/ChibiOS/CMakeLists.txt
-#   lwIP_SOURCE_DIR — the lwIP source directory from nf_add_lwip_library()
 
 # Guard — only build when the driver is selected
 if(NOT "${WIFI_DRIVER}" STREQUAL "WICED_BCM43362")
@@ -79,10 +78,10 @@ set(WICED_SDK_SOURCES
     # SDK wwd_buffer.c REMOVED — uses WICED custom lwIP pool types (PBUF_POOL_TX/RX)
     # SDK wwd_network.c REMOVED — uses WICED custom lwIP extensions
 
-    # ----- ChibiOS RTOS port (nanoFramework — NEW) -----
+    # ----- ChibiOS RTOS port (nanoFramework) -----
     ${CMAKE_CURRENT_SOURCE_DIR}/wiced/wwd_rtos.c
 
-    # ----- AZ3166 platform definition (nanoFramework — NEW) -----
+    # ----- AZ3166 platform definition (nanoFramework) -----
     ${CMAKE_CURRENT_SOURCE_DIR}/wiced/platform.c
 
     # ----- Port replacements for deeply-incompatible SDK files -----
@@ -133,7 +132,21 @@ set(WICED_SDK_INCLUDE_DIRS
     ${WICED_SDK_PATH}/WICED/network/LwIP/WWD
 
     # lwIP core headers (needed by WICED's wwd_debug.h which includes lwip/memp.h)
-    ${lwip_SOURCE_DIR}/src/include
+    # Use the lwIP version bundled with the WICED SDK to avoid external dependency
+    ${WICED_SDK_PATH}/WICED/network/LwIP/ver2.0.3/src/include
+
+    # ChibiOS lwIP arch port: our arch/cc.h, arch/sys_arch.h, arch/perf.h that replace
+    # the FreeRTOS-specific equivalents with ChibiOS types. Must come BEFORE the
+    # FreeRTOS directory so gcc finds these first. No FreeRTOS code is compiled.
+    ${CMAKE_CURRENT_LIST_DIR}/lwip-arch
+
+    # WICED SDK FreeRTOS lwIP port directory — borrowed ONLY for:
+    #   lwipopts.h  : pure #define configuration, zero RTOS dependency
+    #   cpu.h       : #define BYTE_ORDER LITTLE_ENDIAN, nothing else
+    # The arch/ sub-directory here (sys_arch.h, cc.h) is shadowed by lwip-arch/
+    # above and is NEVER included. sys_arch.c from this directory is NOT compiled.
+    # No FreeRTOS header, type, or function is pulled into the build.
+    ${WICED_SDK_PATH}/WICED/network/LwIP/WWD/FreeRTOS
 
     # WICED top-level includes
     ${WICED_SDK_PATH}/include
@@ -206,6 +219,6 @@ set(WICED_SDK_COMPILE_DEFINITIONS
 # Export variables for the parent CMakeLists.txt
 # --------------------------------------------------------------------------
 
-set(WICED_SDK_SOURCES ${WICED_SDK_SOURCES} CACHE INTERNAL "WICED SDK source files")
-set(WICED_SDK_INCLUDE_DIRS ${WICED_SDK_INCLUDE_DIRS} CACHE INTERNAL "WICED SDK include directories")
-set(WICED_SDK_COMPILE_DEFINITIONS ${WICED_SDK_COMPILE_DEFINITIONS} CACHE INTERNAL "WICED SDK compile definitions")
+set(WICED_SDK_SOURCES ${WICED_SDK_SOURCES} CACHE INTERNAL "WICED SDK source files" FORCE)
+set(WICED_SDK_INCLUDE_DIRS ${WICED_SDK_INCLUDE_DIRS} CACHE INTERNAL "WICED SDK include directories" FORCE)
+set(WICED_SDK_COMPILE_DEFINITIONS ${WICED_SDK_COMPILE_DEFINITIONS} CACHE INTERNAL "WICED SDK compile definitions" FORCE)
