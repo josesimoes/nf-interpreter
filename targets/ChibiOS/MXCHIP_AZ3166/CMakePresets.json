@@ -15,7 +15,8 @@
             ],
             "hidden": false,
             "cacheVariables": {
-                "NF_TARGET_DEFCONFIG": "targets/ChibiOS/MXCHIP_AZ3166/defconfig"
+                "NF_TARGET_DEFCONFIG": "targets/ChibiOS/MXCHIP_AZ3166/defconfig",
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo"
             }
         }
     ],

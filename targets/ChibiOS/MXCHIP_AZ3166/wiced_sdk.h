@@ -135,6 +135,7 @@ typedef struct
 
 // wwd_management.h
 extern wwd_result_t wwd_management_wifi_on(wiced_country_code_t country);
+extern wwd_result_t wwd_management_wifi_off(void);
 
 // wwd_buffer_interface.h
 extern wwd_result_t wwd_buffer_init(void* native_arg);

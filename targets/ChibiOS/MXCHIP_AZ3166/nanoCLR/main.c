@@ -18,6 +18,10 @@
 #include <nanoHAL_v2.h>
 #include <targetPAL.h>
 
+#include <nf_lwipthread.h>
+#include <lwip/tcpip.h>
+#include "wiced_sdk.h"
+
 // need to declare the Receiver thread here
 osThreadDef(ReceiverThread, osPriorityHigh, 2048, "ReceiverThread");
 // declare CLRStartup thread here
@@ -89,6 +93,24 @@ int main(void)
 
     // create the receiver thread
     osThreadCreate(osThread(ReceiverThread), NULL);
+
+    // Initialise lwIP and the WICED WiFi module.
+    // wwd_buffer_init() prepares the lwIP-based buffer pool for WICED.
+    // wwd_management_wifi_on() powers on the BCM43362, downloads firmware over SDIO.
+    // lwIPInit() starts the lwIP TCP/IP thread and creates the WiFi netif.
+    wwd_buffer_init(NULL);
+    wwd_management_wifi_on(WICED_COUNTRY_WORLD_WIDE_XX);
+
+    {
+        lwipthread_opts_t lwipOpts;
+        memset(&lwipOpts, 0, sizeof(lwipOpts));
+
+        // MAC address will be filled in by the WICED ethernetif_init from the WiFi chip
+        lwipOpts.addrMode = NET_ADDRESS_DHCP;
+        lwipOpts.ourHostName = "nanodevice";
+
+        lwIPInit(&lwipOpts);
+    }
 
     // CLR settings to launch CLR thread
     CLR_SETTINGS clrSettings;
