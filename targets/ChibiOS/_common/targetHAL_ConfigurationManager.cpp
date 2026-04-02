@@ -52,24 +52,34 @@ __nfweak void ConfigurationManager_EnumerateConfigurationBlocks()
             HAL_Configuration_NetworkInterface *networkConfig =
                 (HAL_Configuration_NetworkInterface *)platform_malloc(sizeof(HAL_Configuration_NetworkInterface));
 
-            if (InitialiseNetworkDefaultConfig(networkConfig, 0))
+            if (networkConfig != NULL)
             {
-                // config block created, store it
-                ConfigurationManager_StoreConfigurationBlock(
-                    networkConfig,
-                    DeviceConfigurationOption_Network,
-                    0,
-                    sizeof(HAL_Configuration_NetworkInterface),
-                    0,
-                    false);
+                memset(networkConfig, 0, sizeof(HAL_Configuration_NetworkInterface));
 
-                // have to enumerate again to pick it up
-                networkConfigs = (HAL_CONFIGURATION_NETWORK *)ConfigurationManager_FindNetworkConfigurationBlocks(
-                    (uint32_t)&__nanoConfig_start__,
-                    (uint32_t)&__nanoConfig_end__);
+#if CONFIG_API_SYSTEM_DEVICE_WIFI
+                networkConfig->InterfaceType = NetworkInterfaceType_Wireless80211;
+#endif
+
+                if (InitialiseNetworkDefaultConfig(networkConfig, 0))
+                {
+                    // config block created, store it
+                    ConfigurationManager_StoreConfigurationBlock(
+                        networkConfig,
+                        DeviceConfigurationOption_Network,
+                        0,
+                        sizeof(HAL_Configuration_NetworkInterface),
+                        0,
+                        false);
+
+                    // have to enumerate again to pick it up
+                    networkConfigs =
+                        (HAL_CONFIGURATION_NETWORK *)ConfigurationManager_FindNetworkConfigurationBlocks(
+                            (uint32_t)&__nanoConfig_start__,
+                            (uint32_t)&__nanoConfig_end__);
+                }
+
+                platform_free(networkConfig);
             }
-
-            platform_free(networkConfig);
         }
 
         // find wireless 80211 network configuration blocks
@@ -77,6 +87,36 @@ __nfweak void ConfigurationManager_EnumerateConfigurationBlocks()
             (HAL_CONFIGURATION_NETWORK_WIRELESS80211 *)ConfigurationManager_FindNetworkWireless80211ConfigurationBlocks(
                 (uint32_t)&__nanoConfig_start__,
                 (uint32_t)&__nanoConfig_end__);
+
+#if CONFIG_API_SYSTEM_DEVICE_WIFI
+        // check wireless configs count
+        if (networkWirelessConfigs->Count == 0)
+        {
+            HAL_Configuration_Wireless80211 *wirelessConfig =
+                (HAL_Configuration_Wireless80211 *)platform_malloc(sizeof(HAL_Configuration_Wireless80211));
+
+            if (wirelessConfig != NULL)
+            {
+                InitialiseWirelessDefaultConfig(wirelessConfig, 0);
+
+                ConfigurationManager_StoreConfigurationBlock(
+                    wirelessConfig,
+                    DeviceConfigurationOption_Wireless80211Network,
+                    0,
+                    sizeof(HAL_Configuration_Wireless80211),
+                    0,
+                    false);
+
+                platform_free(wirelessConfig);
+
+                // have to enumerate again to pick it up
+                networkWirelessConfigs = (HAL_CONFIGURATION_NETWORK_WIRELESS80211 *)
+                    ConfigurationManager_FindNetworkWireless80211ConfigurationBlocks(
+                        (uint32_t)&__nanoConfig_start__,
+                        (uint32_t)&__nanoConfig_end__);
+            }
+        }
+#endif
 
         // find X509 CA certificate blocks
         HAL_CONFIGURATION_X509_CERTIFICATE *certificateStore =
@@ -625,21 +665,50 @@ __nfweak UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock
 // it's implemented with 'weak' attribute so it can be replaced at target level if different configurations are intended
 __nfweak void InitialiseWirelessDefaultConfig(HAL_Configuration_Wireless80211 *pconfig, uint32_t configurationIndex)
 {
+#if CONFIG_API_SYSTEM_DEVICE_WIFI
+    memset(pconfig, 0, sizeof(HAL_Configuration_Wireless80211));
+
+    // make sure the config block marker is set
+    memcpy(pconfig, c_MARKER_CONFIGURATION_WIRELESS80211_V1, sizeof(c_MARKER_CONFIGURATION_WIRELESS80211_V1));
+
+    pconfig->Id = configurationIndex;
+
+    // default to AutoConnect + Enable so station connects on CLR start
+    pconfig->Options =
+        (Wireless80211Configuration_ConfigurationOptions)(Wireless80211Configuration_ConfigurationOptions_AutoConnect |
+                                                          Wireless80211Configuration_ConfigurationOptions_Enable);
+#else
     (void)pconfig;
     (void)configurationIndex;
-
-    // currently empty as no ChibiOS target has Wireless 802.11 interface
+#endif
 }
 
 //  Default initialisation for Network interface config blocks
 // it's implemented with 'weak' attribute so it can be replaced at target level if different configurations are intended
 __nfweak bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface *pconfig, uint32_t configurationIndex)
 {
+#if CONFIG_API_SYSTEM_DEVICE_WIFI
+    // make sure the config block marker is set
+    memcpy(pconfig->Marker, c_MARKER_CONFIGURATION_NETWORK_V1, sizeof(c_MARKER_CONFIGURATION_NETWORK_V1));
+
+    if (pconfig->InterfaceType == NetworkInterfaceType_Wireless80211)
+    {
+        pconfig->StartupAddressMode = AddressMode_DHCP;
+        pconfig->AutomaticDNS = 1;
+        pconfig->SpecificConfigId = configurationIndex;
+
+        // MAC address will be populated from WiFi chip at runtime
+        return TRUE;
+    }
+
+    return FALSE;
+#else
     (void)pconfig;
     (void)configurationIndex;
 
     // can't create a "default" network config because we are lacking definition of a MAC address
     return FALSE;
+#endif
 }
 
 // default implementation
