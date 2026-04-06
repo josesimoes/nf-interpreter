@@ -6,17 +6,14 @@
 #include <sys_dev_wifi_native.h>
 #include <nf_rt_events_native.h>
 
-///////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH System.Device.WiFi (in managed code) !!! //
-///////////////////////////////////////////////////////////////////////////////////////
-struct ScanRecord
-{
-    uint8_t bssid[6];
-    uint8_t ssid[33];
-    uint8_t rssi;
-    uint8_t authMode;
-    uint8_t cypherType;
-};
+// Implemented in Target_Network.cpp — no WICED headers needed here.
+// Returns required buffer length when buf is NULL, otherwise fills buf and returns bytes written.
+extern int Network_Interface_WICED_SerializeScanResults(uint8_t *buf);
+
+// Scan outcome codes — must match values returned by Network_Interface_Start_Scan()
+#define StartScanOutcome_Success                  0
+#define StartScanOutcome_FailedToGetConfiguration 10
+#define StartScanOutcome_WrongInterfaceType       20
 
 HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::NativeSetDeviceName___VOID__STRING(
     CLR_RT_StackFrame &stack)
@@ -186,18 +183,30 @@ HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::NativeDiscon
 HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::NativeScanAsync___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
+    int netIndex;
+    int startScanResult;
+
+    NANOCLR_CHECK_HRESULT(GetNetInterfaceIndex(stack, &netIndex));
+
+    startScanResult = Network_Interface_Start_Scan(netIndex);
+
+    switch (startScanResult)
     {
-        int netIndex;
+        case StartScanOutcome_Success:
+            NANOCLR_SET_AND_LEAVE(S_OK);
+            break;
 
-        NANOCLR_CHECK_HRESULT(GetNetInterfaceIndex(stack, &netIndex));
+        case StartScanOutcome_WrongInterfaceType:
+        case StartScanOutcome_FailedToGetConfiguration:
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+            break;
 
-        // Start scan — scan is not yet implemented for WICED/ChibiOS
-        int startScanResult = Network_Interface_Start_Scan(netIndex);
-        if (startScanResult != 0)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
-        }
+        default:
+            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+            break;
     }
+
     NANOCLR_NOCLEANUP();
 }
 
@@ -205,19 +214,22 @@ HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::NativeScanAs
 HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::GetNativeScanReport___SZARRAY_U1(
     CLR_RT_StackFrame &stack)
 {
-    (void)stack;
     NANOCLR_HEADER();
 
-    // Scan not yet implemented for WICED/ChibiOS — return empty report
     {
         CLR_RT_HeapBlock &top = stack.PushValueAndClear();
 
-        // Minimum valid report: 2 bytes (record count = 0)
-        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, 2, g_CLR_RT_WellKnownTypes.m_UInt8));
+        // First call with NULL to get the required buffer length
+        int rlen = Network_Interface_WICED_SerializeScanResults(NULL);
+        if (rlen < 2)
+            rlen = 2; // minimum: 2-byte zero count
+
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, rlen, g_CLR_RT_WellKnownTypes.m_UInt8));
         CLR_RT_HeapBlock_Array *array = top.DereferenceArray();
         CLR_UINT8 *buf = array->GetFirstElement();
-        buf[0] = 0; // record count
-        buf[1] = 0;
+
+        // Second call to fill the buffer
+        Network_Interface_WICED_SerializeScanResults(buf);
     }
 
     NANOCLR_NOCLEANUP();

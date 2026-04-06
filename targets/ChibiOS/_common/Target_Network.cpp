@@ -22,6 +22,115 @@
 static volatile bool nf_wiced_connect_in_progress = false;
 static volatile int nf_wiced_connect_result = -1; // -1 = pending, 0 = success, 1 = not found, 2 = auth fail, 3 = other
 
+// Scan state tracking for WICED WiFi
+#define NF_WICED_SCAN_MAX_RESULTS 20
+#define WIFI_EVENT_TYPE_SCAN_COMPLETE 1
+
+static volatile bool nf_wiced_scan_in_progress = false;
+static wiced_scan_result_t nf_wiced_scan_results[NF_WICED_SCAN_MAX_RESULTS];
+static volatile uint16_t nf_wiced_scan_count = 0;
+// WICED writes each AP record into this scratch struct; the callback copies to nf_wiced_scan_results[]
+static wiced_scan_result_t nf_wiced_scan_result_scratch;
+// Pointer passed to wwd_wifi_scan (wiced_scan_result_t**); always points at the scratch struct
+static wiced_scan_result_t *nfWicedScanResult = &nf_wiced_scan_result_scratch;
+
+extern void PostManagedEvent(uint8_t category, uint8_t subCategory, uint16_t data1, uint32_t data2);
+
+static void nf_wiced_scan_callback(wiced_scan_result_t **scanResult, void *user_data, wiced_scan_status_t status)
+{
+    (void)user_data;
+
+    if (scanResult == NULL || status != WICED_SCAN_INCOMPLETE)
+    {
+        // Scan complete (or aborted) — notify managed code
+        nf_wiced_scan_in_progress = false;
+        PostManagedEvent(50 /*EVENT_WIFI*/, WIFI_EVENT_TYPE_SCAN_COMPLETE, 0, 0);
+        return;
+    }
+
+    // Copy the result WICED wrote into the scratch buffer into our permanent array
+    if (nf_wiced_scan_count < NF_WICED_SCAN_MAX_RESULTS && *scanResult != NULL)
+    {
+        memcpy(&nf_wiced_scan_results[nf_wiced_scan_count], *scanResult, sizeof(wiced_scan_result_t));
+        nf_wiced_scan_count++;
+    }
+    // *scanResult is left unchanged — WICED reuses the same scratch buffer for the next AP
+}
+
+// Serialize scan results into the ScanRecord byte format expected by managed code.
+//   Layout: uint16_t recordCount, then packed ScanRecord structs.
+//   ScanRecord: bssid[6], ssid[33], rssi (uint8_t, cast from int8_t), authMode, cypherType.
+//
+// Returns the number of bytes written to buf, or the required buffer size when buf is NULL.
+int Network_Interface_WICED_SerializeScanResults(uint8_t *buf)
+{
+    uint16_t count = nf_wiced_scan_count;
+
+    // Each record: 6 (bssid) + 33 (ssid) + 1 (rssi) + 1 (authMode) + 1 (cypherType) = 42 bytes
+    // Plus 2-byte record count header
+    int totalLen = (int)(sizeof(uint16_t) + count * 42u);
+
+    if (buf == NULL)
+    {
+        return totalLen;
+    }
+
+    // Write record count (little-endian)
+    buf[0] = (uint8_t)(count & 0xFF);
+    buf[1] = (uint8_t)((count >> 8) & 0xFF);
+    uint8_t *p = buf + 2;
+
+    for (uint16_t i = 0; i < count; i++)
+    {
+        const wiced_scan_result_t *src = &nf_wiced_scan_results[i];
+
+        // BSSID (6 bytes)
+        memcpy(p, src->BSSID.octet, 6);
+        p += 6;
+
+        // SSID (33 bytes, null-terminated)
+        uint8_t ssidLen = src->SSID.length;
+        if (ssidLen > 32)
+            ssidLen = 32;
+        memcpy(p, src->SSID.value, ssidLen);
+        p[ssidLen] = '\0';
+        p += 33;
+
+        // RSSI: truncate int16_t to int8_t (RSSI typically -100..0 dBm)
+        *p++ = (uint8_t)(int8_t)(src->signal_strength);
+
+        // authMode: map WICED security flags to nanoFramework AuthenticationType
+        uint8_t authMode;
+        if (src->security == WICED_SECURITY_OPEN)
+            authMode = 4; // AuthenticationType_Open
+        else if (src->security & WEP_ENABLED)
+            authMode = 6; // AuthenticationType_WEP
+        else if ((src->security & WPA2_SECURITY) && (src->security & AES_ENABLED))
+            authMode = 8; // AuthenticationType_WPA2
+        else if (src->security & WPA_SECURITY)
+            authMode = 7; // AuthenticationType_WPA
+        else
+            authMode = 4;
+        *p++ = authMode;
+
+        // cypherType: map WICED security flags to nanoFramework EncryptionType
+        uint8_t cipherType;
+        if (src->security == WICED_SECURITY_OPEN)
+            cipherType = 0; // EncryptionType_None
+        else if (src->security & WEP_ENABLED)
+            cipherType = 1; // EncryptionType_WEP
+        else if ((src->security & WPA2_SECURITY) && (src->security & AES_ENABLED))
+            cipherType = 5; // EncryptionType_WPA2_PSK
+        else if (src->security & WPA_SECURITY)
+            cipherType = 4; // EncryptionType_WPA_PSK
+        else
+            cipherType = 0;
+        *p++ = cipherType;
+    }
+
+    return totalLen;
+}
+
 #endif
 
 extern "C" struct netif *nf_getNetif();
@@ -169,12 +278,45 @@ int Network_Interface_Disconnect(int index)
 
 int Network_Interface_Start_Scan(int index)
 {
-    (void)index;
+    HAL_Configuration_NetworkInterface networkConfiguration;
 
-    // WiFi scan is not yet implemented for WICED/ChibiOS
-    // wwd_wifi_scan() requires a callback-based approach that needs
-    // additional infrastructure to integrate with the managed scan API.
-    return -1;
+    if (!ConfigurationManager_GetConfigurationBlock(
+            (void *)&networkConfiguration,
+            DeviceConfigurationOption_Network,
+            index))
+    {
+        return 10; // StartScanOutcome_FailedToGetConfiguration
+    }
+
+    if (networkConfiguration.InterfaceType != NetworkInterfaceType_Wireless80211)
+    {
+        return 20; // StartScanOutcome_WrongInterfaceType
+    }
+
+    // Reset scan state
+    nf_wiced_scan_count = 0;
+    nfWicedScanResult = &nf_wiced_scan_result_scratch; // ensure valid before passing
+    nf_wiced_scan_in_progress = true;
+
+    wwd_result_t result = wwd_wifi_scan(
+        WICED_SCAN_TYPE_PASSIVE,
+        WICED_BSS_TYPE_ANY,
+        NULL, // all SSIDs
+        NULL, // all BSSIDs
+        NULL, // all channels
+        NULL, // no extended params
+        nf_wiced_scan_callback,
+        &nfWicedScanResult, // wiced_scan_result_t** — WICED fills *ptr each call
+        NULL,
+        WWD_STA_INTERFACE);
+
+    if (result != WWD_SUCCESS)
+    {
+        nf_wiced_scan_in_progress = false;
+        return -1; // StartScanOutcome_Fail
+    }
+
+    return 0; // StartScanOutcome_Success
 }
 
 #else

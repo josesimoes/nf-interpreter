@@ -156,4 +156,56 @@ extern wwd_result_t wwd_wifi_join_halt(wiced_bool_t halt);
 extern wwd_result_t wwd_wifi_get_mac_address(wiced_mac_t* mac, wwd_interface_t interface);
 extern wwd_result_t wwd_wifi_is_ready_to_transceive(wwd_interface_t interface);
 
+// wwd_wifi_scan related types and API
+
+typedef enum
+{
+    WICED_SCAN_TYPE_ACTIVE  = 0,
+    WICED_SCAN_TYPE_PASSIVE = 1,
+} wwd_scan_type_t;
+
+typedef enum
+{
+    WICED_BSS_TYPE_INFRASTRUCTURE = 0,
+    WICED_BSS_TYPE_ADHOC          = 1,
+    WICED_BSS_TYPE_ANY            = 2,
+    WICED_BSS_TYPE_MESH           = 4,
+} wwd_bss_type_t;
+
+typedef enum
+{
+    WICED_SCAN_INCOMPLETE             = 0,
+    WICED_SCAN_COMPLETED_SUCCESSFULLY = 1,
+    WICED_SCAN_ABORTED                = 2,
+} wiced_scan_status_t;
+
+typedef struct
+{
+    wiced_ssid_t     SSID;            /**< Service Set Identification */
+    wiced_mac_t      BSSID;           /**< Basic Service Set Identification */
+    int16_t          signal_strength; /**< RSSI in dBm */
+    uint32_t         max_data_rate;   /**< Maximum data rate in Kbits/s */
+    wwd_bss_type_t   bss_type;        /**< Network type */
+    wiced_security_t security;        /**< Security type */
+    uint8_t          channel;         /**< Radio channel */
+    uint8_t          band;            /**< Radio band */
+} wiced_scan_result_t;
+
+typedef void (*wiced_scan_result_handler_t)(
+    wiced_scan_result_t **result_ptr,
+    void *user_data,
+    wiced_scan_status_t status);
+
+extern wwd_result_t wwd_wifi_scan(
+    wwd_scan_type_t scan_type,
+    wwd_bss_type_t bss_type,
+    const wiced_ssid_t *optional_ssid,
+    const wiced_mac_t *optional_mac,
+    const uint16_t *optional_channel_list,
+    const void *optional_extended_params,
+    wiced_scan_result_handler_t callback,
+    wiced_scan_result_t **result_ptr,
+    void *user_data,
+    wwd_interface_t interface);
+
 #endif
