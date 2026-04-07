@@ -113,7 +113,7 @@ static void gpio_set_pin_low(GPIO_TypeDef *port, uint32_t pin)
 // Platform initialization
 // --------------------------------------------------------------------------
 
-void host_platform_init(void)
+wwd_result_t host_platform_init(void)
 {
     // Enable GPIO clocks for ports A, B, C, D (if not already enabled)
     RCC->AHB1ENR |= (RCC_AHB1ENR_GPIOAEN | RCC_AHB1ENR_GPIOBEN |
@@ -138,13 +138,15 @@ void host_platform_init(void)
     // Assert reset (active low → drive LOW to hold in reset)
     gpio_set_pin_low(wifi_control_pins[WWD_PIN_RESET].port,
                      wifi_control_pins[WWD_PIN_RESET].pin_number);
+
+    return WWD_SUCCESS;
 }
 
 // --------------------------------------------------------------------------
 // Reset sequencing
 // --------------------------------------------------------------------------
 
-void host_platform_reset_wifi(int reset_asserted)
+wwd_result_t host_platform_reset_wifi(int reset_asserted)
 {
     if (reset_asserted)
     {
@@ -156,13 +158,15 @@ void host_platform_reset_wifi(int reset_asserted)
         gpio_set_pin_high(wifi_control_pins[WWD_PIN_RESET].port,
                           wifi_control_pins[WWD_PIN_RESET].pin_number);
     }
+
+    return WWD_SUCCESS;
 }
 
 // --------------------------------------------------------------------------
 // Power control
 // --------------------------------------------------------------------------
 
-void host_platform_power_wifi(int power_enabled)
+wwd_result_t host_platform_power_wifi(int power_enabled)
 {
     if (power_enabled)
     {
@@ -175,6 +179,8 @@ void host_platform_power_wifi(int power_enabled)
         // Power off: hold in reset
         host_platform_reset_wifi(1);
     }
+
+    return WWD_SUCCESS;
 }
 
 // --------------------------------------------------------------------------

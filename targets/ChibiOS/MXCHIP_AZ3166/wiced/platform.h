@@ -11,6 +11,7 @@
 #define INCLUDED_PLATFORM_H_
 
 #include <stdint.h>
+#include "wwd_constants.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,9 +39,9 @@ extern "C" {
 // Platform function declarations
 // --------------------------------------------------------------------------
 
-extern void host_platform_init(void);
-extern void host_platform_reset_wifi(int reset_asserted);
-extern void host_platform_power_wifi(int power_enabled);
+extern wwd_result_t host_platform_init(void);
+extern wwd_result_t host_platform_reset_wifi(int reset_asserted);
+extern wwd_result_t host_platform_power_wifi(int power_enabled);
 
 #ifdef __cplusplus
 } // extern "C"
