@@ -21,11 +21,11 @@ nf_setup_target_build(
         ${CMAKE_CURRENT_SOURCE_DIR}/target_mpu_config.c
 
     BOOTER_EXTRA_COMPILE_DEFINITIONS
-        USBH_DEBUG_MULTI_HOST=0
+        -DUSBH_DEBUG_MULTI_HOST=0
 
     CLR_EXTRA_COMPILE_DEFINITIONS
-        USBH_DEBUG_MULTI_HOST=0
-        LFS_CONFIG=lfs_config.h
+        -DUSBH_DEBUG_MULTI_HOST=0
+        -DLFS_CONFIG=lfs_config.h
 
     BOOTER_EXTRA_LINKMAP_PROPERTIES
         ",--library-path=${CMAKE_SOURCE_DIR}/targets/ChibiOS/_common,--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x800,--defsym=__crt_heap_size__=0x2000"

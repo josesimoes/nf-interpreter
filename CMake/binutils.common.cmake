@@ -256,7 +256,13 @@ function(nf_generate_uf2_package file1 address1 file2 address2 familyid outputfi
             "${file1}" "${address1}"
             "${file2}" "${address2}"
 
+        DEPENDS "${file1}" "${file2}"
+
+        BYPRODUCTS "${outputfilename}"
+
         COMMENT "Generating combined UF2 image for RP2040/RP2350 (gap-free)"
+
+        VERBATIM
     )
 
     # need to add a dependency of NANOCLR to NANOBOOTER because UF2 gen needs bin outputs of both targets
