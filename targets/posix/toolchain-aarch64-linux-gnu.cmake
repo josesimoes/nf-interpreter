@@ -7,7 +7,7 @@
 # on an x86_64 Linux host using the aarch64-linux-gnu GCC cross-toolchain.
 #
 # Install the cross-toolchain with:
-#   sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+#   sudo apt-get install -y gcc-15-aarch64-linux-gnu g++-15-aarch64-linux-gnu
 #
 # Usage (passed automatically by CI; not needed for native arm64 builds):
 #   cmake -S targets/posix -B build/posix -G Ninja \
