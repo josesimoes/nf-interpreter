@@ -3070,8 +3070,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         {
                             tsForCctor = calleeInst.genericType;
                         }
-                        else if (stack->m_call.genericType != nullptr &&
-                                 NANOCLR_INDEX_IS_VALID(*stack->m_call.genericType))
+                        else if (
+                            stack->m_call.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*stack->m_call.genericType))
                         {
                             tsForCctor = stack->m_call.genericType;
                         }
