@@ -86,19 +86,26 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Configurat
     // validate arguments
     switch (adc)
     {
-#if STM32_ADC_USE_ADC1
+#if defined(STM32_ADC_USE_ADC1) && STM32_ADC_USE_ADC1
         case 1:
             // all good
             break;
 #endif
 
-#if STM32_ADC_USE_ADC2
+#if defined(STM32_ADC_USE_ADC12) && STM32_ADC_USE_ADC12
+        // STM32H7 ADC1 is accessed through the ADC12 driver (single mode)
+        case 1:
+            // all good
+            break;
+#endif
+
+#if defined(STM32_ADC_USE_ADC2) && STM32_ADC_USE_ADC2
         case 2:
             // all good
             break;
 #endif
 
-#if STM32_ADC_USE_ADC3
+#if defined(STM32_ADC_USE_ADC3) && STM32_ADC_USE_ADC3
         case 3:
             // all good
             break;
