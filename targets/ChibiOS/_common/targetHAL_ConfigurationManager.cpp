@@ -659,9 +659,9 @@ __nfweak UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock
     // the copy only has to hold the config data in use plus room for the block being stored, as it can grow
     // there is no need to copy the whole config sector, which can be larger than the available heap
     uint32_t alignment = GetConfigBlockAlignment();
-    uint32_t copySize = GetExistingConfigSize() +
-                        ((GetConfigurationBlockSize(configurationBlock, configuration) + alignment - 1) / alignment) *
-                            alignment;
+    uint32_t copySize =
+        GetExistingConfigSize() +
+        ((GetConfigurationBlockSize(configurationBlock, configuration) + alignment - 1) / alignment) * alignment;
 
     if (copySize > (uint32_t)sizeOfConfigSector)
     {
