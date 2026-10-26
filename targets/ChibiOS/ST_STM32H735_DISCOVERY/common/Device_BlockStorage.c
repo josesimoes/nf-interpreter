@@ -24,7 +24,8 @@ const BlockRange BlockRange1[] = {
 
 const BlockRegionInfo BlockRegions[] = {
     {
-        (0),        // no attributes for this region
+        // STM32H7 flash requires 256bits width programming (flash word)
+        (BlockRegionAttribute_ProgramWidthIs256bits),
         0x08000000, // start address for block region
         8,          // total number of blocks in this region
         0x20000,    // total number of bytes per block
