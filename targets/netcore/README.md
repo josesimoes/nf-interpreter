@@ -50,6 +50,23 @@ Optional MSBuild properties:
 - `CMakeExecutable`: full path to CMake if automatic discovery is unsuitable.
 - `MbedTlsGenerator`: override the Visual Studio CMake generator.
 
+## Compact string-table contract
+
+String-table contract version 2 is mandatory for every firmware build, including
+the Windows virtual device. There is no feature switch or legacy dictionary.
+Rebuild all deployed PEs with the matching Metadata Processor and regenerate
+their PDBX files. The header check rejects every other contract.
+
+`src/CLR/Core/StringTableData.cpp` is generated from the
+Metadata Processor repository's `assets/compact-string-table.json` using its
+`tools/Generate-StringTable.ps1 -InterpreterRoot <this-checkout>` command.
+Version 2 is frozen at 697 entries, including common generic names from the latest
+preview libraries. Its generator enforces the frozen fingerprint. Keep generated
+C# and C++ outputs synchronized; IDs must not change without a new contract version.
+Rebuild compact PEs made with the earlier prototype dictionary.
+Applications can still be updated independently:
+strings absent from the fixed dictionary remain local to each PE.
+
 ## Networking behavior
 
 - IPv4 TCP clients/servers, UDP (including empty datagrams), DNS, socket options,

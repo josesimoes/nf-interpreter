@@ -22,11 +22,17 @@ void CLR_RT_Assembly::InitString()
 const char *CLR_RT_Assembly::GetString(CLR_STRING i)
 {
     NATIVE_PROFILE_CLR_CORE();
-    static const CLR_STRING iMax = 0xFFFF - c_CLR_StringTable_Size;
+    static const CLR_STRING iMin = c_CLR_StringTable_LastId - c_CLR_StringTable_Size + 1;
 
-    if (i >= iMax)
+    if (i >= iMin)
     {
-        return &c_CLR_StringTable_Data[c_CLR_StringTable_Lookup[(CLR_STRING)0xFFFF - i]];
+        if (i > c_CLR_StringTable_LastId)
+        {
+            CLR_Debug::Printf("Invalid string reference: %04x\r\n", i);
+            return nullptr;
+        }
+
+        return &c_CLR_StringTable_Data[c_CLR_StringTable_Lookup[c_CLR_StringTable_LastId - i]];
     }
 
     return &(((const char *)GetTable(TBL_Strings))[i]);
@@ -39,7 +45,7 @@ void CLR_RT_Assembly::InitString(std::map<std::string, CLR_OFFSET> &map)
     NATIVE_PROFILE_CLR_CORE();
     const CLR_STRING *array = c_CLR_StringTable_Lookup;
     size_t len = c_CLR_StringTable_Size;
-    CLR_STRING index = 0xFFFF;
+    CLR_STRING index = c_CLR_StringTable_LastId;
 
     map.clear();
 
