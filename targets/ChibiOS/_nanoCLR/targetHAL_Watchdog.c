@@ -107,7 +107,7 @@ void Watchdog_Init()
     // these are required to stop the watchdog peripheral when stopping the core
     // useful for debugging without the watchdog triggering
 
-#if defined(STM32L4XX)
+#if defined(STM32L4XX) || defined(STM32H5XX)
     DBGMCU->APB1FZR1 |= DBGMCU_APB1FZR1_DBG_IWDG_STOP;
     DBGMCU->APB1FZR1 |= DBGMCU_APB1FZR1_DBG_WWDG_STOP;
 #elif defined(STM32H7XX)

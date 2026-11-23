@@ -21,7 +21,7 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_RTC::
     uint32_t alarmRegister = 0;
 
 #if defined(STM32F7XX) || defined(STM32F3XX) || defined(STM32F0XX) || defined(STM32F4XX) || defined(STM32L0XX) ||      \
-    defined(STM32L4XX) || defined(STM32H7XX)
+    defined(STM32L4XX) || defined(STM32H5XX) || defined(STM32H7XX)
 
     // these series are using driver RTCv2
     // the alarm is set on a register with the various values BCD coded
@@ -74,6 +74,15 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_RTC::
 
 #endif
 
+#if defined(STM32H5XX)
+
+    CLEAR_BIT(RTC->CR, RTC_CR_ALRAIE);
+
+    // the alarm flag is cleared through the status clear register
+    WRITE_REG(RTC->SCR, RTC_SCR_CALRAF);
+
+#endif
+
     rtcSetAlarm(&RTCD1, ALARM_ID, &alarmTime);
 
     NANOCLR_NOCLEANUP_NOLABEL();
@@ -104,7 +113,7 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_RTC::GetAl
     rtcGetAlarm(&RTCD1, ALARM_ID, &alarmValue);
 
 #if defined(STM32F7XX) || defined(STM32F3XX) || defined(STM32F0XX) || defined(STM32F4XX) || defined(STM32L0XX) ||      \
-    defined(STM32L4XX) || defined(STM32H7XX)
+    defined(STM32L4XX) || defined(STM32H5XX) || defined(STM32H7XX)
 
     // these series are using driver RTCv2
     // the alarm is set on a register with the various values BCD coded

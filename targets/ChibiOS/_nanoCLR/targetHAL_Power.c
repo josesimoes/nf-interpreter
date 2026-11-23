@@ -120,6 +120,36 @@ void CPU_SetPowerMode(PowerLevel_type powerLevel)
             }
             (void)success;
 
+#elif defined(STM32H5XX)
+
+            // only need to change this option bit if not already done
+            if ((FLASH->OPTSR_CUR & FLASH_OPTSR_IWDG_STDBY))
+            {
+                // developer notes:
+                // follow workflow recommended in the option bytes programming section of the reference manual
+                // Authorizes the Option Byte register programming
+                FLASH->OPTKEYR = FLASH_OPT_KEY1;
+                FLASH->OPTKEYR = FLASH_OPT_KEY2;
+
+                // write option value (clear the FLASH_OPTSR_IWDG_STDBY)
+                CLEAR_BIT(FLASH->OPTSR_PRG, FLASH_OPTSR_IWDG_STDBY);
+
+                // set the option start bit
+                FLASH->OPTCR |= FLASH_OPTCR_OPTSTART;
+
+                // Data synchronous Barrier, forcing the CPU to respect the sequence of instruction without
+                // optimization
+                __DSB();
+
+                // wait for the option byte change to be completed
+                while (FLASH->NSSR & FLASH_SR_BSY)
+                    ;
+
+                // Set the OPTLOCK Bit to lock the FLASH Option Byte Registers access
+                FLASH->OPTCR |= FLASH_OPTCR_OPTLOCK;
+            }
+            (void)success;
+
 #elif defined(STM32H7XX)
 
             // only need to change this option bit if not already done
@@ -174,6 +204,11 @@ void CPU_SetPowerMode(PowerLevel_type powerLevel)
 
             SET_BIT(PWR->CR1, PWR_CR1_PDDS);
 
+#endif
+
+#if defined(STM32H5XX)
+            // standby is the low power mode to enter on deep sleep
+            SET_BIT(PWR->PMCR, PWR_PMCR_LPMS);
 #endif
 
 #if defined(STM32H7XX)

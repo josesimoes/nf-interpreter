@@ -20,7 +20,12 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_BackupMemo
     uint32_t dataLength = buffer->m_numOfElements;
 
     // address of bkp register 0
+#if defined(STM32H5XX)
+    // in this series the backup registers are in the TAMP peripheral
+    __IO uint32_t *baseAddress = &(TAMP->BKP0R);
+#else
     __IO uint32_t *baseAddress = &(RTC->BKP0R);
+#endif
     uint8_t *storeAddress = ((uint8_t *)baseAddress + position);
     uint32_t *registerAddress = NULL;
     uint32_t tempRegisterValue;
@@ -37,7 +42,11 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_BackupMemo
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
 
     // check if the store address is starting at a register address boundary
+#if defined(STM32H5XX)
+    remainder = (uint32_t)((uint32_t *)storeAddress) % sizeof(TAMP_BKP0R_Msk);
+#else
     remainder = (uint32_t)((uint32_t *)storeAddress) % sizeof(RTC_BKP0R_Msk);
+#endif
     registerAddress = (uint32_t *)(storeAddress - remainder);
 
     if (remainder > 0)
@@ -126,7 +135,12 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_BackupMemo
     uint32_t dataLength = buffer->m_numOfElements;
 
     // address of bkp register 0
+#if defined(STM32H5XX)
+    // in this series the backup registers are in the TAMP peripheral
+    __IO uint32_t *baseAddress = &(TAMP->BKP0R);
+#else
     __IO uint32_t *baseAddress = &(RTC->BKP0R);
+#endif
     uint8_t *storeAddress = ((uint8_t *)baseAddress + position);
     uint32_t *registerAddress = NULL;
     uint32_t tempRegisterValue;
@@ -147,7 +161,11 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_BackupMemo
     // and overwrite as required this can happen at the begining and/or at the end of the buffer
 
     // check if the store address is starting at a register address boundary
+#if defined(STM32H5XX)
+    remainder = (uint32_t)((uint32_t *)storeAddress) % sizeof(TAMP_BKP0R_Msk);
+#else
     remainder = (uint32_t)((uint32_t *)storeAddress) % sizeof(RTC_BKP0R_Msk);
+#endif
     registerAddress = (uint32_t *)(storeAddress - remainder);
 
     if (remainder > 0)

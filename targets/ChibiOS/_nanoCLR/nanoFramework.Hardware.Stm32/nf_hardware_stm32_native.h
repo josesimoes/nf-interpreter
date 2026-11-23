@@ -47,7 +47,12 @@ struct Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_BackupMemor
 
     // need to address the fact that the majority of the series have 32 bits wide registers and F1 has 16bits wide.
     // the backup size is calculated with the number of available backup registers and their size (in bytes)
+#if defined(STM32H5XX)
+    // in this series the backup registers are in the TAMP peripheral
+    static const int BACKUP_SIZE = RTC_BKP_NB * sizeof(TAMP_BKP0R_Msk);
+#else
     static const int BACKUP_SIZE = RTC_BKP_NUMBER * sizeof(RTC_BKP0R_Msk);
+#endif
 };
 
 struct Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Configuration

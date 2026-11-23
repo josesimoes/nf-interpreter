@@ -38,7 +38,8 @@ void NMI_Handler(void)
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 #endif
 
-#if defined(STM32F4XX) || defined(STM32F7XX) || defined(STM32H7XX) || defined(STM32L4XX) || defined(RP2350)
+#if defined(STM32F4XX) || defined(STM32F7XX) || defined(STM32H5XX) || defined(STM32H7XX) || defined(STM32L4XX) ||      \
+    defined(RP2350)
 
 // hard fault handler for Cortex-M3 & M4
 
@@ -56,7 +57,7 @@ void HardFault_Handler(void)
     volatile FaultType faultType = (FaultType)__get_IPSR();
 
     // these are not available in all the STM32 series
-#if defined(STM32F4XX) || defined(STM32F7XX) || defined(STM32H7XX)
+#if defined(STM32F4XX) || defined(STM32F7XX) || defined(STM32H5XX) || defined(STM32H7XX)
 
     // Flags about hardfault / busfault
     // See http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0552a/Cihdjcfc.html for reference
@@ -200,7 +201,7 @@ void UsageFault_Handler(void)
     (void)faultType;
 
     // these are not available in all the STM32 series
-#if defined(STM32F4XX) || defined(STM32F7XX) || defined(STM32H7XX)
+#if defined(STM32F4XX) || defined(STM32F7XX) || defined(STM32H5XX) || defined(STM32H7XX)
 
     // Flags about hardfault / busfault
     // See http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0552a/Cihdjcfc.html for reference
@@ -235,7 +236,7 @@ void MemManage_Handler(void)
     (void)faultType;
 
     // these are not available in all the STM32 series
-#if defined(STM32F4XX) || defined(STM32F7XX) || defined(STM32H7XX)
+#if defined(STM32F4XX) || defined(STM32F7XX) || defined(STM32H5XX) || defined(STM32H7XX)
 
     // For HardFault/BusFault this is the address that was accessed causing the error
     volatile uint32_t faultAddress = SCB->MMFAR;

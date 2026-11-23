@@ -66,6 +66,12 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power::Dis
         case WakeupPin_Pin1:
             wakeUpPin = PWR_WKUPEPR_WKUPEN1;
             break;
+      #elif defined(PWR_WUCR_WUPEN1)
+
+        case WakeupPin_Pin1:
+            wakeUpPin = PWR_WUCR_WUPEN1;
+            break;
+
       #else
         #error "missing include for STM32 target PAL"
       #endif
@@ -86,6 +92,12 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power::Dis
         case WakeupPin_Pin2:
             wakeUpPin = PWR_WKUPEPR_WKUPEN2;
             break;
+      #elif defined(PWR_WUCR_WUPEN2)
+
+        case WakeupPin_Pin2:
+            wakeUpPin = PWR_WUCR_WUPEN2;
+            break;
+
       #endif
 
       #if defined(PWR_CSR_EWUP3)
@@ -124,6 +136,12 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power::Dis
   #if defined(STM32H7XX)
 
     CLEAR_BIT(PWR->WKUPEPR, wakeUpPin);
+
+  #endif
+
+  #if defined(STM32H5XX)
+
+    CLEAR_BIT(PWR->WUCR, wakeUpPin);
 
   #endif
 
@@ -196,6 +214,12 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power::Ena
             wakeUpPin = PWR_WKUPEPR_WKUPEN1;
             break;
 
+      #elif defined(PWR_WUCR_WUPEN1)
+
+        case WakeupPin_Pin1:
+            wakeUpPin = PWR_WUCR_WUPEN1;
+            break;
+
       #else
         #error "missing include for STM32 target PAL"
       #endif
@@ -236,6 +260,12 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power::Ena
 
         case WakeupPin_Pin2:
             wakeUpPin = PWR_WKUPEPR_WKUPEN2;
+            break;
+
+      #elif defined(PWR_WUCR_WUPEN2)
+
+        case WakeupPin_Pin2:
+            wakeUpPin = PWR_WUCR_WUPEN2;
             break;
 
       #endif
@@ -306,6 +336,13 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power::Ena
 
     // enable the wake up pin
     SET_BIT(PWR->WKUPEPR, wakeUpPin);
+
+  #endif
+
+  #if defined(STM32H5XX)
+
+    // enable the wake up pin
+    SET_BIT(PWR->WUCR, wakeUpPin);
 
   #endif
 

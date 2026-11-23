@@ -115,8 +115,8 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Configurat
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-#if defined(STM32H7XX)
-    // STM32H7 ADCs have channels 0 to 19
+#if defined(STM32H5XX) || defined(STM32H7XX)
+    // STM32H5 and STM32H7 ADCs have channels 0 to 19
     if (adcChannel > 19)
 #else
     if (adcChannel > 15)

@@ -107,8 +107,9 @@ if(NOT NO_CHIBIOS_SOURCE_FOLDER)
 else()
     # no CHIBIOS source specified, download it from it's repo
 
-    # temporary workaround to fetch from master branch for RPI Pico targets
-    if("${_TARGET_SERIES_PREFIX}" STREQUAL "RP2")
+    # fetch from master branch the series that are not available in the stable branch
+    # RPI Pico targets (temporary workaround) and STM32H5
+    if("${_TARGET_SERIES_PREFIX}" STREQUAL "RP2" OR "${TARGET_SERIES}" STREQUAL "STM32H5xx")
 
         message(STATUS "RTOS is: ChibiOS from GitHub repo (master branch)")
 

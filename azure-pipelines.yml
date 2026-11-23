@@ -436,6 +436,14 @@ jobs:
           NeedsSRECORD: true
           CMakePreset: ST_STM32H735_DISCOVERY
 
+        ST_STM32H5F5J_DISCOVERY:
+          TargetBoard: ST_STM32H5F5J_DISCOVERY
+          TargetSeries: "stm32h5xx"
+          BuildOptions:
+          NeedsDFU: false
+          NeedsSRECORD: true
+          CMakePreset: ST_STM32H5F5J_DISCOVERY
+
         ST_B_L475E_IOT01A:
           TargetBoard: ST_B_L475E_IOT01A
           TargetSeries: 'stm32l4xx'

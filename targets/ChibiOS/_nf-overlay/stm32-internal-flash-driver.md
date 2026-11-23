@@ -9,6 +9,8 @@ The following versions of the driver are available:
 - FLASHv2: suitable for F4 and F7 series
 - FLASHv3: suitable for L0 series
 - FLASHv4: suitable for L4 series
+- FLASHv5: suitable for H7 series (single bank devices)
+- FLASHv6: suitable for H5 series
 
 
 The functions provided by driver are:

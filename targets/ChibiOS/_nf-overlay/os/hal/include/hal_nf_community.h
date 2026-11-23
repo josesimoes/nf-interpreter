@@ -47,8 +47,8 @@
 
 // Normal drivers
 // STM32-specific overlay drivers — only include for STM32 targets
-#if defined(STM32F0XX) || defined(STM32F4XX) || defined(STM32F7XX) || defined(STM32H7XX) || defined(STM32L0XX) ||      \
-    defined(STM32L4XX)
+#if defined(STM32F0XX) || defined(STM32F4XX) || defined(STM32F7XX) || defined(STM32H5XX) || defined(STM32H7XX) ||      \
+    defined(STM32L0XX) || defined(STM32L4XX)
 #include "stm32_qspi/hal_stm32_qspi.h"
 #include "stm32_flash/hal_stm32_flash.h"
 #include "stm32_crc/hal_stm32_crc.h"

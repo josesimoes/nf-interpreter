@@ -65,12 +65,13 @@ void GetI2cConfig(CLR_RT_HeapBlock *managedConfig, I2CConfig *llConfig)
     llConfig->clock_speed = busSpeed == I2cBusSpeed_StandardMode ? 100000U : 400000U;
     llConfig->duty_cycle = busSpeed == I2cBusSpeed_StandardMode ? STD_DUTY_CYCLE : FAST_DUTY_CYCLE_2;
 
-#elif defined(STM32H7XX)
+#elif defined(STM32H5XX) || defined(STM32H7XX)
 
     // Standard mode : 100 KHz, Rise time 120 ns, Fall time 25 ns, 64MHz clock source (HSI kernel clock)
     // Fast mode : 400 KHz, Rise time 120 ns, Fall time 25 ns, 64MHz clock source (HSI kernel clock)
-    // requires the I2C kernel clock set to HSI_KER_CK in mcuconf.h (STM32_I2C4SEL, STM32_I2C1235SEL)
-    // NOTE: ChibiOS 21.11 only supports PCLK1 for STM32_I2C1235SEL, so only I2C4 can use these timings
+    // requires the I2C kernel clock set to HSI in mcuconf.h (STM32_I2C1SEL...STM32_I2C4SEL) and the HSI divider to 1
+    // for STM32H7 the requirement is STM32_I2C4SEL and STM32_I2C1235SEL set to HSI_KER_CK
+    // NOTE: ChibiOS 21.11 only supports PCLK1 for STM32_I2C1235SEL, so on STM32H7 only I2C4 can use these timings
     llConfig->timingr = busSpeed == I2cBusSpeed_StandardMode ? 0xF0421313 : 0x7031060A;
     llConfig->cr1 = 0;
     llConfig->cr2 = 0;

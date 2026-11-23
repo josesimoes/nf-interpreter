@@ -16,11 +16,16 @@
 
 #if (HAL_NF_USE_STM32_CRC == TRUE)
 
+#if !defined(STM32_CRC_PROGRAMMABLE)
+#define STM32_CRC_PROGRAMMABLE FALSE
+#endif
+
 ///////////////////////////////////////////////////////////////////////////////
 // Driver local definitions.                                                 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#if (STM32_CRC_PROGRAMMABLE == TRUE) || defined(STM32F7XX) || defined(STM32L0XX) || defined(STM32H7XX)
+#if (STM32_CRC_PROGRAMMABLE == TRUE) || defined(STM32F7XX) || defined(STM32L0XX) || defined(STM32H5XX) ||             \
+    defined(STM32H7XX)
 
 // CRC default configuration.
 static const crcConfig defaultConfig = {
@@ -68,7 +73,8 @@ void crc_lld_start(const crcConfig *config)
     // enable peripheral
     rccEnableCRC(FALSE);
 
-#if (STM32_CRC_PROGRAMMABLE == TRUE) || defined(STM32F7XX) || defined(STM32L0XX) || defined(STM32H7XX)
+#if (STM32_CRC_PROGRAMMABLE == TRUE) || defined(STM32F7XX) || defined(STM32L0XX) || defined(STM32H5XX) ||             \
+    defined(STM32H7XX)
 
     // set configuration, if supplied
     if (config == NULL)
@@ -84,7 +90,8 @@ void crc_lld_start(const crcConfig *config)
     osalDbgAssert(config == NULL, "CRC peripheral doesn't support configuration");
 #endif
 
-#if (STM32_CRC_PROGRAMMABLE == TRUE) || defined(STM32F7XX) || defined(STM32L0XX) || defined(STM32H7XX)
+#if (STM32_CRC_PROGRAMMABLE == TRUE) || defined(STM32F7XX) || defined(STM32L0XX) || defined(STM32H5XX) ||             \
+    defined(STM32H7XX)
 
     WRITE_REG(CRCD1.Instance->INIT, DEFAULT_CRC_INITVALUE);
 
@@ -216,7 +223,8 @@ crc_lld_compute(const void *buffer, const uint32_t size, const uint32_t initialC
         // Reset CRC Calculation Unit
         crc_lld_reset();
 
-#if (STM32_CRC_PROGRAMMABLE == TRUE) || defined(STM32F7XX) || defined(STM32L0XX) || defined(STM32H7XX)
+#if (STM32_CRC_PROGRAMMABLE == TRUE) || defined(STM32F7XX) || defined(STM32L0XX) || defined(STM32H5XX) ||             \
+    defined(STM32H7XX)
         // set initial CRC value
         WRITE_REG(CRCD1.Instance->INIT, initialCrc);
 #endif

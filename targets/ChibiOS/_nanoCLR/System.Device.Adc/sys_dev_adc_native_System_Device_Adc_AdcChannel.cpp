@@ -154,6 +154,26 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcChannel::NativeReadValue
     // perform the conversion
     adcConvert(adcDriver, &adcgrpcfg1, sampleBuffer, 1);
 
+#elif defined(STM32H5XX)
+
+    (void)enableVref;
+
+    // need to setup the conversion group parameters
+    // internal channels (sensor, VREF, VBAT) aren't supported
+    adcgrpcfg1 = {};
+    adcgrpcfg1.circular = FALSE;
+    adcgrpcfg1.num_channels = 1;
+    adcgrpcfg1.end_cb = NULL;
+    adcgrpcfg1.error_cb = NULL; // replace with adcerrorcallback if required for debug
+    adcgrpcfg1.cfgr = ADC_CFGR_RES_12BITS;
+    adcgrpcfg1.smpr[0] = adcDefinition.adcChannel < 10 ? (ADC_SMPR_SMP_92P5 << (adcDefinition.adcChannel * 3U)) : 0;
+    adcgrpcfg1.smpr[1] =
+        adcDefinition.adcChannel >= 10 ? (ADC_SMPR_SMP_92P5 << ((adcDefinition.adcChannel - 10) * 3U)) : 0;
+    adcgrpcfg1.sqr[0] = ADC_SQR1_SQ1_N(adcDefinition.adcChannel);
+
+    // perform the conversion
+    adcConvert(adcDriver, &adcgrpcfg1, sampleBuffer, 1);
+
 #else
     enableVref = (adcDefinition.adcChannel == ADC_CHANNEL_SENSOR) | (adcDefinition.adcChannel == ADC_CHANNEL_VREFINT) |
                  (adcDefinition.adcChannel == ADC_CHANNEL_VBAT);

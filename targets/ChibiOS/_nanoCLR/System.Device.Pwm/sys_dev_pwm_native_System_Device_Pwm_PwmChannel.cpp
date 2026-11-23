@@ -952,6 +952,196 @@ int GetChannelPwm(int pin, int timerId)
             break;
     }
 #endif
+#if defined(STM32H5F5xx)
+    switch (timerId)
+    {
+        case 1:
+            switch (pin)
+            {
+                case 8: // PA8, PD13, PE9, PG13, PH11, PI4
+                case 3 * 16 + 13:
+                case 4 * 16 + 9:
+                case 6 * 16 + 13:
+                case 7 * 16 + 11:
+                case 8 * 16 + 4:
+                    channel = 0;
+                    break;
+                case 9: // PA9, PE11, PH9, PI6
+                case 4 * 16 + 11:
+                case 7 * 16 + 9:
+                case 8 * 16 + 6:
+                    channel = 1;
+                    break;
+                case 10: // PA10, PE13, PH7, PI9
+                case 4 * 16 + 13:
+                case 7 * 16 + 7:
+                case 8 * 16 + 9:
+                    channel = 2;
+                    break;
+                case 11: // PA11, PE14, PI11
+                case 4 * 16 + 14:
+                case 8 * 16 + 11:
+                    channel = 3;
+                    break;
+            }
+            break;
+
+        case 2:
+            switch (pin)
+            {
+                case 0: // PA0, PA5, PA15, PF0
+                case 5:
+                case 15:
+                case 5 * 16 + 0:
+                    channel = 0;
+                    break;
+                case 1: // PA1, PB3, PF1
+                case 1 * 16 + 3:
+                case 5 * 16 + 1:
+                    channel = 1;
+                    break;
+                case 2: // PA2, PB10, PF3, PF11
+                case 1 * 16 + 10:
+                case 5 * 16 + 3:
+                case 5 * 16 + 11:
+                    channel = 2;
+                    break;
+                case 3: // PA3, PB11, PC4, PF4, PF12
+                case 1 * 16 + 11:
+                case 2 * 16 + 4:
+                case 5 * 16 + 4:
+                case 5 * 16 + 12:
+                    channel = 3;
+                    break;
+            }
+            break;
+
+        case 3:
+            switch (pin)
+            {
+                case 6: // PA6, PB4, PB10, PC6, PF5, PK11
+                case 1 * 16 + 4:
+                case 1 * 16 + 10:
+                case 2 * 16 + 6:
+                case 5 * 16 + 5:
+                case 10 * 16 + 11:
+                    channel = 0;
+                    break;
+                case 7: // PA7, PB5, PC7, PF2, PK12
+                case 1 * 16 + 5:
+                case 2 * 16 + 7:
+                case 5 * 16 + 2:
+                case 10 * 16 + 12:
+                    channel = 1;
+                    break;
+                case 1 * 16 + 0: // PB0, PC8, PK13
+                case 2 * 16 + 8:
+                case 10 * 16 + 13:
+                    channel = 2;
+                    break;
+                case 1 * 16 + 1: // PB1, PC9, PK14
+                case 2 * 16 + 9:
+                case 10 * 16 + 14:
+                    channel = 3;
+                    break;
+            }
+            break;
+
+        case 4:
+            switch (pin)
+            {
+                case 1 * 16 + 6: // PB6, PD12, PG0, PJ3
+                case 3 * 16 + 12:
+                case 6 * 16 + 0:
+                case 9 * 16 + 3:
+                    channel = 0;
+                    break;
+                case 1 * 16 + 7: // PB7, PD13, PG1, PJ4
+                case 3 * 16 + 13:
+                case 6 * 16 + 1:
+                case 9 * 16 + 4:
+                    channel = 1;
+                    break;
+                case 1 * 16 + 8: // PB8, PD14, PG2, PJ5
+                case 3 * 16 + 14:
+                case 6 * 16 + 2:
+                case 9 * 16 + 5:
+                    channel = 2;
+                    break;
+                case 1 * 16 + 9: // PB9, PC2, PD15, PG3, PJ6
+                case 2 * 16 + 2:
+                case 3 * 16 + 15:
+                case 6 * 16 + 3:
+                case 9 * 16 + 6:
+                    channel = 3;
+                    break;
+            }
+            break;
+
+        case 5:
+            switch (pin)
+            {
+                case 0: // PA0, PH10, PJ7
+                case 7 * 16 + 10:
+                case 9 * 16 + 7:
+                    channel = 0;
+                    break;
+                case 1: // PA1, PH11, PJ8
+                case 7 * 16 + 11:
+                case 9 * 16 + 8:
+                    channel = 1;
+                    break;
+                case 2: // PA2, PH12, PJ9
+                case 7 * 16 + 12:
+                case 9 * 16 + 9:
+                    channel = 2;
+                    break;
+                case 3: // PA3, PI0, PJ10
+                case 8 * 16 + 0:
+                case 9 * 16 + 10:
+                    channel = 3;
+                    break;
+            }
+            break;
+
+        case 8:
+            switch (pin)
+            {
+                case 2 * 16 + 0: // PC0, PC6, PH6, PI5, PK0
+                case 2 * 16 + 6:
+                case 7 * 16 + 6:
+                case 8 * 16 + 5:
+                case 10 * 16 + 0:
+                    channel = 0;
+                    break;
+                case 2 * 16 + 1: // PC1, PC7, PH8, PI6, PK2
+                case 2 * 16 + 7:
+                case 7 * 16 + 8:
+                case 8 * 16 + 6:
+                case 10 * 16 + 2:
+                    channel = 1;
+                    break;
+                case 2 * 16 + 2: // PC2, PC8, PH10, PI7, PK4
+                case 2 * 16 + 8:
+                case 7 * 16 + 10:
+                case 8 * 16 + 7:
+                case 10 * 16 + 4:
+                    channel = 2;
+                    break;
+                case 2 * 16 + 9: // PC9, PD3, PI2, PK6
+                case 3 * 16 + 3:
+                case 8 * 16 + 2:
+                case 10 * 16 + 6:
+                    channel = 3;
+                    break;
+            }
+            break;
+
+        default:
+            channel = -1;
+            break;
+    }
+#endif
 #if defined(STM32F091xC)
     switch (timerId)
     {

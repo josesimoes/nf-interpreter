@@ -13,8 +13,8 @@
 #include <sys_dev_spi_native_target.h>
 #include <hal.h>
 
-#if defined(STM32H7XX)
-// STM32H7 SPI has the half duplex direction control in HDDIR
+#if defined(STM32H5XX) || defined(STM32H7XX)
+// STM32H5 and STM32H7 SPI have the half duplex direction control in HDDIR
 // NOTE: half duplex mode is not supported by the ChibiOS SPIv3 driver, so this is never used
 #define SPI_CR1_BIDIOE SPI_CR1_HDDIR
 #endif
@@ -1009,6 +1009,39 @@ uint16_t ComputeBaudRate(SPI_DEVICE_CONFIGURATION &config, int32_t &actualFreque
             break;
     }
 
+#elif defined(STM32H5XX)
+
+    // each SPI is feed by its own kernel clock (selected in mcuconf.h, STM32_SPIxSEL)
+    switch (busIndex)
+    {
+        case 1:
+            actualFrequency = STM32_SPI1CLK;
+            break;
+
+        case 2:
+            actualFrequency = STM32_SPI2CLK;
+            break;
+
+        case 3:
+            actualFrequency = STM32_SPI3CLK;
+            break;
+
+        case 4:
+            actualFrequency = STM32_SPI4CLK;
+            break;
+
+        case 5:
+            actualFrequency = STM32_SPI5CLK;
+            break;
+
+        default:
+            actualFrequency = STM32_SPI6CLK;
+            break;
+    }
+
+    // conservative maximum, valid for all the SPI peripherals
+    maxSpiFrequency = 50000000;
+
 #elif defined(STM32L4XX)
 
     // SPI1 is feed by APB2 (STM32_PCLK2)
@@ -1052,7 +1085,7 @@ uint16_t ComputeBaudRate(SPI_DEVICE_CONFIGURATION &config, int32_t &actualFreque
         }
     }
 
-#if defined(STM32H7XX)
+#if defined(STM32H5XX) || defined(STM32H7XX)
     // the baud rate bits (MBR) are in CFG1, caller has to shift the divider value
     return divider;
 #else
@@ -1121,7 +1154,7 @@ void GetSPIConfig(SPI_DEVICE_CONFIGURATION &config, SPI_WRITE_READ_SETTINGS &wrc
 {
     int32_t actualFrequency;
 
-#if defined(STM32H7XX)
+#if defined(STM32H5XX) || defined(STM32H7XX)
 
     // clear values
     llConfig->cfg1 = 0;
