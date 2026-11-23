@@ -9127,12 +9127,11 @@ bool CLR_RT_GenericDispatch::FindVirtualMethodInChain(
                 {
                     size_t targetQualifierLen = targetLen - calleeLen - 1;
 
-                    nameMatch = genericQualifier ? (targetQualifierLen > qualifierLen &&
-                                                    !strncmp(targetName, qualifier, qualifierLen) &&
-                                                    targetName[qualifierLen] == '<' &&
-                                                    targetName[targetQualifierLen - 1] == '>')
-                                                 : (targetQualifierLen == qualifierLen &&
-                                                    !strncmp(targetName, qualifier, qualifierLen));
+                    nameMatch =
+                        genericQualifier
+                            ? (targetQualifierLen > qualifierLen && !strncmp(targetName, qualifier, qualifierLen) &&
+                               targetName[qualifierLen] == '<' && targetName[targetQualifierLen - 1] == '>')
+                            : (targetQualifierLen == qualifierLen && !strncmp(targetName, qualifier, qualifierLen));
                 }
             }
 
