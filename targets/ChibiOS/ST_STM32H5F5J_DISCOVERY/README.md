@@ -18,6 +18,16 @@ In _mcuconf.h_ (in both nanoBooter and nanoCLR folders), when compared with the 
 
 NOTE: this configuration uses the Serial port through the onboard ST Link USB connection.
 
+## Debugging with OpenOCD
+
+Use an STMicroelectronics OpenOCD build with STM32H5E/H5F support (device ID `0x47A`, 4MB flash), together with its matching scripts.
+Stock OpenOCD 0.12.0 does not include the STM32H5 flash driver; copying `target/stm32h5x.cfg` into that installation is not sufficient.
+The [ST OpenOCD fork](https://github.com/STMicroelectronics/OpenOCD) includes the required driver support.
+
+Both launch profiles use `interface/stlink-dap.cfg` and explicitly select `dapdirect_swd` before loading `target/stm32h5x.cfg`.
+The legacy `interface/stlink.cfg` uses HLA, which the STM32H5 target script does not support.
+Set `debugServerPath` to the ST OpenOCD executable and the `-s` argument in `debugServerArgs` to its matching scripts directory.
+
 ## Flash layout
 
 The STM32H5F5 has 4MB of flash organized in two banks of 2MB, with sectors of 8kB.
